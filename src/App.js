@@ -30,6 +30,7 @@ function App() {
 
   useEffect(() => {
     getQuetion();
+    console.log("Use Effect called");
   }, []);
 
   console.log(question);
