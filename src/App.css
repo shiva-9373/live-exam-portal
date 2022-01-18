@@ -103,23 +103,23 @@ label {
   width: 24px;
   z-index: 10;
 }
-form {
+.form1 {
   position: relative;
   width: 200px;
 }
 
-form input {
+.form1 input {
   width: 100%;
   padding-right: 20px;
   box-sizing: border-box;
 }
 
-form input:placeholder-shown+button {
+.form1 input:placeholder-shown+button {
   opacity: 0;
   pointer-events: none;
 }
 
-form button {
+.form1 button {
   position: absolute;
   border: none;
   display: block;
@@ -157,4 +157,41 @@ form button {
   margin-left: 10px;
   margin-right: 10px
 }
+
+
+.form2 {
+  position: relative;
+  width: 200px;
+}
+
+.form2 input {
+  width: 280px;
+  box-sizing: border-box;
+}
+
+.form2 input:placeholder-shown+button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form2 button {
+  position: absolute;
+  border: none;
+  display: block;
+  width: 15px;
+  height: 15px;
+  line-height: 16px;
+  font-size: 12px;
+  border-radius: 50%;
+  top: 30px;
+  bottom: 0;
+  left: 230px;
+  margin: auto;
+  background: rgb(231, 6, 6);
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  transition: .1s;
+}
+
 

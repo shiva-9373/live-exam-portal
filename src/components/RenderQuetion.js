@@ -1,6 +1,15 @@
 import React from "react";
+import { Link } from "react-router-dom";
+
 
 function RenderQuetion(props) {
+  let EditQueID
+
+
+  const handleEditClick=(event)=>{
+    EditQueID=event.target.id
+    console.log(EditQueID)
+  }
   function display() {
     const array = props.data.map((prev1) => {
       return (
@@ -29,11 +38,12 @@ function RenderQuetion(props) {
               type="button"
               data-toggle="tooltip"
               id={prev1._id}
+              onClick={handleEditClick}
 
               data-placement="top"
               title="Edit"
             >{<img src="https://img.icons8.com/material-rounded/14/000000/edit--v1.png"/>  }
-              edit
+            <Link to={{pathname:`/addquestion/${prev1._id}`, state:"hello" }}   >edit</Link>  
             </button>
             <button
               class="btn btn-white btn-sm rounded-1 ml-1"

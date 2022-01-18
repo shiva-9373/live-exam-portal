@@ -1,8 +1,85 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
+import { useParams, useLocation } from "react-router-dom";
+import http from "../services/http_common";
+
 function AddQuetion() {
+  const [data, setData] = useState();
+  const [loading, setLoading] = useState(true);
+  const [lengthQuetion, setLengthQuestion] = useState(0);
+  const [subjectData, setSubjectData] = useState();
+  const [topicData, setTopicData] = useState();
+
+  const [defaultInfo,setDefaultInfo]=useState()
+
+
+  useEffect(() => {
+    async function fetchdata() {
+      setLoading(true);
+      const request1 = await http.get(`subjects?term=`);
+      setSubjectData(request1.data);
+      setLoading(false);
+    }
+    fetchdata();
+  }, []);
+
+  useEffect(() => {
+    async function fetchdata() {
+      setLoading(true);
+      const request1 = await http.get(`questions/${id}`);
+      setData(request1.data);
+      setDefaultInfo(request1.data)
+      setLengthQuestion(request1.data.totalCount);
+      setLoading(false);
+    }
+    fetchdata();
+  }, []);
+
+  console.log(defaultInfo);
+
+  const location = useLocation();
+  let { id } = useParams();
+  console.log(id);
+
+  function subjectDynamic() {
+    if (subjectData) {
+      const array = subjectData.result.map((prev) => {
+        return <option value={prev.name} />;
+      });
+      return array;
+    }
+    return (
+      <div>
+        <option value="Web Designing" />
+        <option value="Web Development" />
+        <option value="IOS App Development" />
+        <option value="Wordpress Site" />
+        <option value="" />
+      </div>
+    );
+  }
+
+
+  // function topicDynamic() {
+  //   if (subjectData) {
+  //     const array = topicData.result.map((prev) => {
+  //       return <option value={prev.name} />;
+  //     });
+  //     return array;
+  //   }
+  //   return (
+  //     <div>
+  //       <option value="Web Designing" />
+  //       <option value="Web Development" />
+  //       <option value="IOS App Development" />
+  //       <option value="Wordpress Site" />
+  //       <option value="" />
+  //     </div>
+  //   );
+  // }
+
   return (
-    <div class=" text-left">
+    <div class="container text-left">
       {" "}
       <div class=" text-left mt-5 ">
         <h1>Edit Question</h1>
@@ -12,52 +89,79 @@ function AddQuetion() {
           <div class="card mt-2 mx-auto p-4 bg-light">
             <div class="card-body bg-light">
               <div class="container">
-                <form id="contact-form" role="form">
+                <div id="contact-form" role="form">
                   <div class="controls">
-                    <div class="row">
+                  <div className="row">
+
                       <div class="col-md-6">
-                        <div class="form-group formGrp">
+                        <div class="form-group ">
                           {" "}
-                          <label for="form_name"> Select Subject</label>{" "}
-                          <input
-                            id="form_name"
-                            type="text"
-                            list="select_quetion"
-                            name="name"
-                            class="form-control"
-                            placeholder="Type to search Subject"
-                            required="required"
-                            data-error="Firstname is required."
-                          />
-                          <datalist id="select_quetion">
-                            <option value="Web Designing" />
-                            <option value="Web Development" />
-                            <option value="IOS App Development" />
-                            <option value="Wordpress Site" />
-                            <option value="UI/UX Development" />
+                          <form className="form2">
+                            <label for="form_name">Select Subject</label>{" "}
+                            <input
+                              type="text"
+                              list="select_question1"
+                              id="form_name"
+                              value= { defaultInfo && defaultInfo.subject.name }
+                              onChange={(event)=>{
+                                setDefaultInfo({...defaultInfo,defaultInfo.subject.name=event.target.value})
+                              }}
+                              // onChange={handleTopicClick}
+                              // value={inputValue}
+                              // onFocus={clear}
+                              class="form-control"
+                              placeholder="Type to search Subject"
+                              required="required"
+                              data-error="Firstname is required."
+                              placeholder="Search topic here "
+                            />
+                            <button
+                              // onClick={() => {
+                              //   setInputValue("");
+                              //   setTopicId("")
+                              // }}
+                              type="reset"
+                            >
+                              &times;
+                            </button>
+                          </form>
+                          <datalist id="select_question1">
+                            {subjectDynamic()}
                           </datalist>{" "}
                         </div>
                       </div>
                       <div class="col-md-6">
-                        <div class="form-group">
+                        <div class="form-group ">
                           {" "}
-                          <label for="form_lastname">Select Topic</label>{" "}
-                          <input
-                            id="form_lastname"
-                            type="text"
-                            name="surname"
-                            list="select_topic"
-                            class="form-control"
-                            placeholder="Type to search Topic"
-                            required="required"
-                            data-error="Lastname is required."
-                          />
-                          <datalist id="select_topic">
-                            <option value="Web Designing" />
-                            <option value="Web Development" />
-                            <option value="IOS App Development" />
-                            <option value="Wordpress Site" />
-                            <option value="UI/UX Development" />
+                          <form className="form2">
+                            <label for="form_name">Select Topic</label>{" "}
+                            <input
+                             value= { data && data.topic.name}
+
+                              type="text"
+                              list="select_question1"
+                              id="form_name"
+                              // onChange={handleTopicClick}
+                              // value={inputValue}
+                              // onFocus={clear}
+                              class="form-control"
+                              placeholder="Type to search Subject"
+                              required="required"
+                              data-error="Firstname is required."
+                              placeholder="Search topic here "
+                            />
+                            <button
+                              // onClick={() => {
+                              //   setInputValue("");
+                              //   setTopicId("")
+                              // }}
+                              type="reset"
+                            >
+                              &times;
+                            </button>
+                          </form>
+                          <datalist id="select_question1">
+                            {/* {topicDynamic()} */}
                           </datalist>{" "}
                         </div>
                       </div>
@@ -199,14 +303,15 @@ function AddQuetion() {
                               aria-describedby="basic-addon1"
                             />
                           </div>
-                         
                         </div>
-                        
                       </div>
                       <div class="row " style={{ textAlign: "left" }}>
                         <div class="col-md-10">
                           {" "}
-                          <button class="btn btn-outline-success btn-lg " type="submit">
+                          <button
+                            class="btn btn-outline-success btn-lg "
+                            type="submit"
+                          >
                             Submit
                           </button>
                           <button
@@ -220,10 +325,10 @@ function AddQuetion() {
                       </div>
                     </div>
                   </div>
-                </form>
-                <button class="btn btn-outline-white  btn-lg ">  
-                            + Add Option
-                          </button>
+                </div>
+                <button class="btn btn-outline-white  btn-lg ">
+                  + Add Option
+                </button>
               </div>
             </div>
           </div>

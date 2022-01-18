@@ -107,12 +107,15 @@ function DisplayQuetions2(props) {
    
   };
 
+
   let selectedPage;
   const handlePageClick = (e) => {
     selectedPage = e.selected;
     console.log(typeof selectedPage);
     setOffset(selectedPage * countPerPage);
   };
+
+  
 
   const handleTopicClick = (event) => {
     if (!event.nativeEvent.inputType) {
@@ -133,11 +136,11 @@ function DisplayQuetions2(props) {
     console.log(topicId);
   };
 
-  const clear = (event) => {
-    event.target.value = "";
-    setTopicId("");
-    inputValue("");
-  };
+  // const clear = (event) => {
+  //   event.target.value = "";
+  //   setTopicId("");
+  //   inputValue("");
+  // };
 
   const handleDropDownClick = (event) => {
     setCountPerPage(parseInt(event.target.id));
@@ -151,13 +154,12 @@ function DisplayQuetions2(props) {
   if (loading) {
     return <h1>Data is loading...</h1>;
   }
-  const crossButton = () => <span>x</span>;
   return (
     <>
       <div>
         <div className=" firstContainer d-flex">
           <h2 className="que">Quetions</h2>
-          <Link to="/addquestion" className="btn addButton btn-primary">
+          <Link to={{pathname:`/addquestion1`,state:"hello" }}className="btn addButton btn-primary">
             + Add Quetion
           </Link>
         </div>
@@ -233,15 +235,14 @@ function DisplayQuetions2(props) {
                     aria-label="Search"
                     onChange={handleSearchChange}
                   />
-                  <button type="reset">&times;</button>
                 </form>
                 <div class="col-md-6">
                   <div class="form-group ">
                     {" "}
-                    <form>
+                    <form className="form1">
                       <input
                         type="text"
-                        list="select_quetion"
+                        list="select_question"
                         id="form_name"
                         onChange={handleTopicClick}
                         value={inputValue}
@@ -262,17 +263,19 @@ function DisplayQuetions2(props) {
                         &times;
                       </button>
                     </form>
-                    <datalist id="select_quetion">{dropDownDynamic()}</datalist>{" "}
+                    <datalist id="select_question">{dropDownDynamic()}</datalist>{" "}
                   </div>
                 </div>
               </div>
             </div>
           </nav>
           <div>
-            <RenderQuetion
-              data={sliceData ? sliceData.result : []}
+           { data && <RenderQuetion
+              data={data ? sliceData.result : []}
               handleDeleteClick={(event) => handleDeleteClick(event)}
-            />
+              // handleEditClick={(event) => handleEditClick(event)}
+
+            />}
 
             <ReactPaginate
               previousLabel={"prev"}

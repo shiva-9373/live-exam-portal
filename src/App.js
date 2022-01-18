@@ -1,6 +1,6 @@
 import "./App.css";
 import Navbar from "./components/Navbar";
-import AddQuetion from "./components/AddQuetion";
+import AddQuestion1 from "./components/AddQuestion1";
 import Footer from "./components/Footer";
 import DisplayQuetions from "./components/DisplayQuetionsStruct";
 import DisplayQuestion2 from "./components/DisplayQuestion2"
@@ -12,7 +12,7 @@ import DataListExample from "./components/DataList";
 
 function App() {
   const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWRlNTgyY2U2ZDdkNzdjOGU0ZmEzMWEiLCJfYWN0aXZlT3JnIjoiNjE5Y2U0YThlNTg2ODUxNDYxMGM4ZGE3IiwiaWF0IjoxNjQyMzEzOTA2LCJleHAiOjE2NDIzNTcxMDZ9.LeSUkdTyLOVxe-h9eM6rC5E5tlOyC-gCDdoKHwYBSsI";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWRlNTgyY2U2ZDdkNzdjOGU0ZmEzMWEiLCJfYWN0aXZlT3JnIjoiNjE5Y2U0YThlNTg2ODUxNDYxMGM4ZGE3IiwiaWF0IjoxNjQyMzkyNDQ4LCJleHAiOjE2NDI0MzU2NDh9.K7LdpBUOKDC5tbU-K76LC6yEgoQSuAwWWZ6tNjH61kc";
 
   const [question, setQuetion] = useState();
 
@@ -42,7 +42,7 @@ function App() {
           path="/"
           element={question && <DisplayQuestion2 data={question} />}
         />
-        <Route path="/addquestion" element={<AddQuetion />} />
+        <Route path="/addquestion1" element={<AddQuestion1 />} />
       </Routes>
       <Footer />
     </BrowserRouter>

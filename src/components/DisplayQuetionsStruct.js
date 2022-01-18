@@ -180,7 +180,7 @@ setOffset(selectedPage*countPerPage)
           </div>
         </nav>
         <div>
-          <RenderQuetion data={sliceData} />
+          <RenderQuetion data= {sliceData?sliceData :[]} />
           
             <ReactPaginate
               previousLabel={"prev"}
