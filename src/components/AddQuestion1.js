@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import http from "../services/http_common";
-import { type } from "@testing-library/user-event/dist/type";
+import OptionRender from "./OptionRender";
+import { v4 as uuid } from "uuid";
 
 function AddQuetion() {
   const [data, setData] = useState();
@@ -11,15 +12,12 @@ function AddQuetion() {
   const [topicData, setTopicData] = useState();
   const typeArray = ["MULTIPLE CHOICE", "MULTIPLE RESPONSE", "FILL IN BLANKS"];
   const difficultyArray = ["Easy", "Medium", "Hard"];
-  let optionArray = [];
+  const [array, setArray] = useState([1, 2, 3, 4]);
 
-  const [optionObject, setOptionObject] = useState({
-    _id: "",
-    option: "",
-    isCorrect: false,
-  });
-
-  const array = [1, 2, 3, 4];
+  const [options, setOptions] = useState(
+    Array(array.length).fill({ _id: "", option: "", isCorrect: false })
+  );
+  let demo=Array(array.length).fill({ _id: "", option: "", isCorrect: false })
 
   /* ----------------------------- Question Object------------------------------------ */
 
@@ -45,7 +43,6 @@ function AddQuetion() {
     }
     fetchdata();
   }, [subjectID]);
-  console.log(subjectData);
 
   /* ----------------------------- To fetch Topic API------------------------------------ */
 
@@ -96,20 +93,13 @@ function AddQuetion() {
   /* ----------------------------- To Change subject------------------------------------ */
 
   const handleSubjectClick = (event) => {
-    if (!event.nativeEvent.inputType) {
-      event.target.blur();
-    }
-    setQuestion({ ...question, subject:event.target.name });
+    setQuestion({ ...question, subject: event.target.value });
 
     for (let i = 0; i < subjectData.result.length; i++) {
-      console.log("hello");
-
       if (event.target.value == subjectData.result[i].name) {
-        console.log("hello");
         setQuestion({ ...question, subject: subjectData.result[i].name });
 
         setSubjectId(subjectData.result[i]._id);
-        // console.log("topic id  " + topic.result[i]._id);
       }
     }
   };
@@ -117,16 +107,11 @@ function AddQuetion() {
   /* ----------------------------- To Change Topic------------------------------------ */
 
   const handleTopicClick = (event) => {
-    if (!event.nativeEvent.inputType) {
-      event.target.blur();
-    }
-    console.log("hello");
+    setQuestion({ ...question, topic: event.target.value });
+
     for (let i = 0; i < topicData.length; i++) {
       if (event.target.value == topicData[i].name) {
-        console.log("hello1");
-
         setQuestion({ ...question, topic: topicData[i].name });
-        // console.log("topic id  " + topic.result[i]._id);
       }
     }
   };
@@ -134,13 +119,10 @@ function AddQuetion() {
   /* ----------------------------- To Change Type------------------------------------ */
 
   const handleTypeClick = (event) => {
-    console.log(event.target.value);
+    setQuestion({ ...question, type: event.target.value });
     for (let i = 0; i < typeArray.length; i++) {
       if (event.target.value == typeArray[i]) {
-        console.log("hello1");
-
         setQuestion({ ...question, type: typeArray[i] });
-        // console.log("topic id  " + topic.result[i]._id);
       }
     }
   };
@@ -148,79 +130,228 @@ function AddQuetion() {
   /* ----------------------------- To Change Difficulty------------------------------------ */
 
   const handleDiffClick = (event) => {
-    console.log(event.target.value);
+    setQuestion({ ...question, diffLevel: event.target.value });
     for (let i = 0; i < difficultyArray.length; i++) {
       if (event.target.value == difficultyArray[i]) {
-        console.log("hello1");
-
         setQuestion({ ...question, diffLevel: difficultyArray[i] });
-        // console.log("topic id  " + topic.result[i]._id);
       }
     }
   };
 
   /* ----------------------------- To Render Options ------------------------------------ */
-  function optionRender() {
-    let count = 0;
-    let optionId = { _id: "", option: "", isCorrect: false };
-    let final=[]
+  // function optionRender() {
+  //   let count = 0;
+  //   let optionId = { _id: "", option: "", isCorrect: false };
+  //   let final=[]
 
-    const renderOptionArray = array.map((prev) => {
-      // setOptionObject({...optionObject,_id:count})
-      optionId._id = count;
-      optionArray.push(optionId)
+  //   const renderOptionArray = array.map((prev) => {
+  //     // setOptionObject({...optionObject,_id:count})
+  //     optionId._id = count;
+  //     final.push(optionId)
+  //     return (
+  //       <div class="input-group mb-3">
+  //         <span class="input-group-text" id="basic-addon1">
+  //           <input
+  //             name="option"
+  //             id={count}
+  //             key={count}
+  //             type={
+  //               question.type === "MULTIPLE RESPONSE" ? "checkbox" : "radio"
+  //             }
+  //           />
+  //           &nbsp;
+  //           <label for="optionRender"> option {count}</label>
+  //         </span>
+  //         <textarea
+  //           required="required"
+  //           data-error="Please, leave us a message."
+  //           type="text"
+  //           id=""
+  //           value={prev.option}
+  //           onChange={() => {}}
+  //           className="form-control"
+  //           placeholder="Username"
+  //           aria-label="Username"
+  //           aria-describedby="basic-addon1"
+  //         />
+  //       </div>
+  //     );
+  //   })
 
-      return (
-        <div class="input-group mb-3">
-          <span class="input-group-text" id="basic-addon1">
-            <input
-              name="option"
-              id={count}
-              key={count}
-              type={
-                question.type === "MULTIPLE RESPONSE" ? "checkbox" : "radio"
-              }
-            />
-            &nbsp;
-            <label for="optionRender"> option {count}</label>
-          </span>
-          <textarea
-            required="required"
-            data-error="Please, leave us a message."
-            type="text"
-            id=""
-            value={prev.option}
-            onChange={() => {}}
-            class="form-control"
-            placeholder="Username"
-            aria-label="Username"
-            aria-describedby="basic-addon1"
-          />
-        </div>
-      );
-    })
-    return(renderOptionArray);
+  //   return(renderOptionArray);
+  // }
+  //   setQuestion({...question,options:optionArray})
+  /* ----------------------------- render option ------------------------------------ */
+
+  function handleChange(event) {
+    console.log(event.target.name);
+    console.log(event.target.value);
+    console.log(options);
+
+   demo[event.target.name].option=event.target.value
+
+
+    // setOptions((prev) => 
+    //   [...prev
+    //   (prev[event.target.name] = {
+    //     _id: event.target.id,
+    //     option: event.target.value,
+    //     isCorrect: false,
+    //   })],
+    // );
+
+   
   }
-//   setQuestion({...question,options:optionArray})
+
+  
+  console.log(demo)
+
+  function handleRadioClick(event) {
+    console.log(event.target.id);
+    let array2 = options.slice();
+    let array = array2[event.target.name];
+    array.isCorrect = Boolean(event.target.value);
+    array2[event.target.name] = array;
+    // setOptions(array2);
+  }
+
+  function handleCheckboxClick(event) {
+    console.log(event.target.id);
+
+    console.log(options);
+    let array2 = options.slice();
+    let array = array2[event.target.name];
+    array.isCorrect = event.target.checked;
+    array2[event.target.name] = array;
+    // setOptions(array2);
+  }
+
+  /* ----------------------------- Try ------------------------------------ */
+
+  // function optionDisplay() {
+  //   let count = 0;
+  //   return array.map((prev) => {
+  //     const index = array.indexOf(prev);
+  //     console.log(index);
+  //     const unique_id = uuid();
+  //     const small_id = unique_id.slice(0, 8);
+
+  //     return (
+  //       <div class="input-group mb-3">
+  //         <span class="input-group-text" id="basic-addon1">
+  //           {question.type === "MULTIPLE RESPONSE" ? (
+  //             <input
+  //               type="checkbox"
+  //               id={`${small_id}${index}`}
+  //               name={index}
+  //               checked={options[index].isCorrect}
+  //               onChange={(event) => {
+  //                 handleCheckboxClick(event);
+  //               }}
+  //             />
+  //           ) : (
+  //             <input
+  //               name={index}
+  //               id={`${small_id}${index}`}
+  //               // name="option"
+  //               key={`${index}`}
+  //               value={options[index].isCorrect}
+  //               type="radio"
+  //               onClick={(event) => {
+  //                 handleRadioClick(event);
+  //               }}
+  //             />
+  //           )}
+  //           &nbsp;
+  //           <label for="optionRender"> option {++count}</label>
+  //         </span>
+  //         <textarea
+  //           name={index}
+  //           id={`${small_id}${index + 1}`}
+  //           required="required"
+  //           data-error="Please, leave us a message."
+  //           type="text"
+  //           value={options[index].option}
+  //           onChange={(event) => {
+  //             handleChange(event);
+  //           }}
+  //           className="form-control"
+  //         />
+  //       </div>
+  //     );
+  //   });
+  // }
+
+  /* ----------------------------- Try2 ------------------------------------ */
+
+  function optionDisplay() {
+    let index1 = 0;
+    const unique_id = uuid();
+    const small_id = unique_id.slice(0, 8);
+
+    return (
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">
+          {question.type === "MULTIPLE RESPONSE" ? (
+            <input
+              type="checkbox"
+              id={`${small_id}`}
+              // name={index}
+              // checked={options[index].isCorrect}
+              onChange={(event) => {
+                handleCheckboxClick(event);
+              }}
+            />
+          ) : (
+            <input
+              // name={index}
+              id={`${small_id}`}
+              // name="option"
+              // key={`${index}`}
+              // value={options[index].isCorrect}
+              type="radio"
+              onClick={(event) => {
+                handleRadioClick(event);
+              }}
+            />
+          )}
+          &nbsp;
+          <label for="optionRender"> option </label>
+        </span>
+        <textarea
+          name={index1}
+          id={`${small_id}`}
+          required="required"
+          data-error="Please, leave us a message."
+          type="text"
+          // value={options[index].option}
+          onChange={(event) => {
+            handleChange(event);
+          }}
+          className="form-control"
+        />
+      </div>
+    );
+  }
 
   /* ----------------------------- Html ------------------------------------ */
-  console.log(optionArray);
+
   return (
-    <div class="container text-left">
+    <div className="container text-left">
       {" "}
-      <div class=" text-left mt-5 ">
+      <div className=" text-left mt-5 ">
         <h1>Edit Question</h1>
       </div>
-      <div class="row  " style={{ textAlign: "left" }}>
-        <div class="col-lg-10 mx-auto">
-          <div class="card mt-2 mx-auto p-4 bg-light">
-            <div class="card-body bg-light">
-              <div class="container">
+      <div className="row  " style={{ textAlign: "left" }}>
+        <div className="col-lg-10 mx-auto">
+          <div className="card mt-2 mx-auto p-4 bg-light">
+            <div className="card-body bg-light">
+              <div className="container">
                 <div id="contact-form" role="form">
-                  <div class="controls">
+                  <div className="controls">
                     <div className="row">
-                      <div class="col-md-6">
-                        <div class="form-group ">
+                      <div className="col-md-6">
+                        <div className="form-group ">
                           {" "}
                           <form className="form2">
                             <label for="form_name">Select Subject</label>{" "}
@@ -255,8 +386,8 @@ function AddQuetion() {
                           </datalist>{" "}
                         </div>
                       </div>
-                      <div class="col-md-6">
-                        <div class="form-group ">
+                      <div className="col-md-6">
+                        <div className="form-group ">
                           {" "}
                           <form className="form2">
                             <label for="form_name">Select Topic</label>{" "}
@@ -268,7 +399,7 @@ function AddQuetion() {
                               onChange={handleTopicClick}
                               value={question.topic}
                               // onFocus={clear}
-                              class="form-control"
+                              className="form-control"
                               placeholder="Type to search Subject"
                               required="required"
                               data-error="Firstname is required."
@@ -289,9 +420,9 @@ function AddQuetion() {
                         </div>
                       </div>
                     </div>
-                    <div class="row">
-                      <div class="col-md-6">
-                        <div class="form-group">
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="form-group">
                           {" "}
                           <form className="form2">
                             <label for="form_name">Select Question type</label>{" "}
@@ -302,7 +433,7 @@ function AddQuetion() {
                               onChange={handleTypeClick}
                               value={question.type}
                               // onFocus={clear}
-                              class="form-control"
+                              className="form-control"
                               placeholder="Type to search Subject"
                               required="required"
                               data-error="Firstname is required."
@@ -324,8 +455,8 @@ function AddQuetion() {
                           </datalist>{" "}
                         </div>
                       </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
+                      <div className="col-md-6">
+                        <div className="form-group">
                           {" "}
                           <form className="form2">
                             <label for="form_name">
@@ -338,7 +469,7 @@ function AddQuetion() {
                               onChange={handleDiffClick}
                               value={question.diffLevel}
                               // onFocus={clear}
-                              class="form-control"
+                              className="form-control"
                               placeholder="Type to search Subject"
                               required="required"
                               data-error="Firstname is required."
@@ -360,9 +491,9 @@ function AddQuetion() {
                           </datalist>{" "}
                         </div>
                       </div>
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
+                      <div className="row">
+                        <div className="col-md-6">
+                          <div className="form-group">
                             {" "}
                             <label for="form_name">Right Marks</label>{" "}
                             <input
@@ -375,15 +506,15 @@ function AddQuetion() {
                                   rightMarks: event.target.value,
                                 });
                               }}
-                              class="form-control"
+                              className="form-control"
                               placeholder="Please enter Wrong Marks"
                               required="required"
                               data-error="Firstname is required."
                             />{" "}
                           </div>
                         </div>
-                        <div class="col-md-6">
-                          <div class="form-group">
+                        <div className="col-md-6">
+                          <div className="form-group">
                             {" "}
                             <label for="form_lastname">Wrong Marks</label>{" "}
                             <input
@@ -397,7 +528,7 @@ function AddQuetion() {
                                 });
                               }}
                               // name="surname"
-                              class="form-control"
+                              className="form-control"
                               placeholder="Please enter Right Marks "
                               required="required"
                               data-error="Lastname is required."
@@ -406,9 +537,9 @@ function AddQuetion() {
                         </div>
                       </div>
                     </div>
-                    <div class="row " style={{ textAlign: "left" }}>
-                      <div class="col-md-12">
-                        <div class="form-group">
+                    <div className="row " style={{ textAlign: "left" }}>
+                      <div className="col-md-12">
+                        <div className="form-group">
                           {" "}
                           <label for="form_message ">Question</label>{" "}
                           <textarea
@@ -420,27 +551,53 @@ function AddQuetion() {
                                 questionText: event.target.value,
                               });
                             }}
-                            class="form-control"
+                            className="form-control"
                             placeholder="Write your Question here."
                             rows="2"
                             required="required"
                             data-error="Please, leave us a message."
                           ></textarea>{" "}
                           <label for="basic-addon1 ">Options</label>{" "}
-                          {optionRender()}
+                          
+                            {/* /* {array.map((prev) => {
+                               const index=array.indexOf(prev)
+
+                            return(
+                            <OptionRender
+                              question={question}
+                              options={options}
+                              index={index}
+                              handleChange={(event) => {
+                                handleChange(event);
+                              }}
+                              handleRadioClick={(event) => {
+                                handleRadioClick(event);
+                              }}
+                              handleCheckboxClick={(event) => {
+                                handleCheckboxClick(event);
+                              }}
+                            />);
+                          })} */ }
+                            
+                               <div>{optionDisplay()}</div>
+                          
+                          
                         </div>
                       </div>
-                      <div class="row " style={{ textAlign: "left" }}>
-                        <div class="col-md-10">
+                      <div className="row " style={{ textAlign: "left" }}>
+                        <div className="col-md-10">
                           {" "}
                           <button
-                            class="btn btn-outline-success btn-lg "
+                            className="btn btn-outline-success btn-lg "
                             type="submit"
+                            onClick={() => {
+                              setQuestion({ ...question, options: options });
+                            }}
                           >
                             Submit
                           </button>
                           <button
-                            class="btn btn-outline-secondary btn-lg "
+                            className="btn btn-outline-secondary btn-lg "
                             style={{ marginLeft: "20px" }}
                             type="cancel"
                           >
@@ -451,7 +608,7 @@ function AddQuetion() {
                     </div>
                   </div>
                 </div>
-                <button class="btn btn-outline-white  btn-lg ">
+                <button className="btn btn-outline-white  btn-lg ">
                   + Add Option
                 </button>
               </div>

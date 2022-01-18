@@ -26,7 +26,6 @@ function DisplayQuetions2(props) {
   //         setData(data);
   //       })
   //       .catch((err) => {
-  //         console.log(err);
   //       })
   //       .finally(() => {
   //         setLoading(false);
@@ -69,12 +68,10 @@ function DisplayQuetions2(props) {
     fetchdata();
   }, [countPerPage, topicId, term, deleteQueId]);
 
-  console.log(data);
   // useEffect(()=>{
   //   async function fetchdata(){
   //  const request2=await service.getTopic()
   //  setTopic(request2.data)
-  // console.log(request2)
   //  }
   //  fetchdata()
   // },[])
@@ -111,7 +108,6 @@ function DisplayQuetions2(props) {
   let selectedPage;
   const handlePageClick = (e) => {
     selectedPage = e.selected;
-    console.log(typeof selectedPage);
     setOffset(selectedPage * countPerPage);
   };
 
@@ -122,18 +118,13 @@ function DisplayQuetions2(props) {
       event.target.blur();
     }
     setInputValue(event.target.value)
-    console.log("hii");
-    console.log(event.target.value);
     for (let i = 0; i < topic.result.length; i++) {
-      console.log("hello");
       if (event.target.value == topic.result[i].name) {
         setTopicId(topic.result[i]._id);
         setInputValue(topic.result[i].name);
-        console.log("topic id  " + topic.result[i]._id);
       }
     }
 
-    console.log(topicId);
   };
 
   // const clear = (event) => {
@@ -165,14 +156,14 @@ function DisplayQuetions2(props) {
         </div>
 
         <div className="container border    ">
-          <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
+          <nav className="navbar navbar-expand-lg navbar-light bg-light">
+            <div className="container-fluid">
               <div className="d-flex">
                 <p>Show</p>
 
-                <div class="dropdown">
+                <div className="dropdown">
                   <button
-                    class="btn btn-outline-success dropdown-toggle"
+                    className="btn btn-outline-success dropdown-toggle"
                     type="button"
                     id="dropdownMenuButton"
                     data-toggle="dropdown"
@@ -182,25 +173,25 @@ function DisplayQuetions2(props) {
                     {countPerPage}
                   </button>
                   <div
-                    class="dropdown-menu border-success"
+                    className="dropdown-menu border-success"
                     aria-labelledby="dropdownMenuButton"
                   >
                     <button
-                      class="dropdown-item "
+                      className="dropdown-item "
                       id={5}
                       onClick={handleDropDownClick}
                     >
                       5
                     </button>
                     <button
-                      class="dropdown-item "
+                      className="dropdown-item "
                       id={10}
                       onClick={handleDropDownClick}
                     >
                       10
                     </button>
                     <button
-                      class="dropdown-item"
+                      className="dropdown-item"
                       id={20}
                       onClick={handleDropDownClick}
                     >
@@ -208,14 +199,14 @@ function DisplayQuetions2(props) {
                       20
                     </button>
                     <button
-                      class="dropdown-item"
+                      className="dropdown-item"
                       id={30}
                       onClick={handleDropDownClick}
                     >
                       30
                     </button>
                     <button
-                      class="dropdown-item"
+                      className="dropdown-item"
                       id={50}
                       onClick={handleDropDownClick}
                     >
@@ -225,10 +216,10 @@ function DisplayQuetions2(props) {
                 </div>
                 <p>record per page</p>
               </div>
-              <div className="d-flex">
-                <form class="d-flex">
+              <div classNameName="d-flex">
+                <form className="d-flex">
                   <input
-                    class="form-control me-2"
+                    className="form-control me-2"
                     type="search"
                     value={term}
                     placeholder="Search"
@@ -236,8 +227,8 @@ function DisplayQuetions2(props) {
                     onChange={handleSearchChange}
                   />
                 </form>
-                <div class="col-md-6">
-                  <div class="form-group ">
+                <div className="col-md-6">
+                  <div className="form-group ">
                     {" "}
                     <form className="form1">
                       <input
@@ -247,7 +238,7 @@ function DisplayQuetions2(props) {
                         onChange={handleTopicClick}
                         value={inputValue}
                         // onFocus={clear}
-                        class="form-control"
+                        className="form-control"
                         placeholder="Type to search Subject"
                         required="required"
                         data-error="Firstname is required."
@@ -285,7 +276,8 @@ function DisplayQuetions2(props) {
               pageRangeDisplayed={4}
               marginPagesDisplayed={1}
               // onPageChange={setPage}
-              containerClassName="pagination"
+              container
+              className="pagination"
               activeClassName="active"
               pageLinkClassName="page-link"
               breakLinkClassName="page-link"
