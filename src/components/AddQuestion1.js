@@ -12,24 +12,62 @@ function AddQuetion() {
   const [topicData, setTopicData] = useState();
   const typeArray = ["MULTIPLE CHOICE", "MULTIPLE RESPONSE", "FILL IN BLANKS"];
   const difficultyArray = ["Easy", "Medium", "Hard"];
-  const [array, setArray] = useState([1, 2, 3, 4]);
+  const [postConfirm, setPostConfirm] = useState();
+  const[errors,setErrors]=useState({subject:""})
 
-  const [options, setOptions] = useState(
-    Array(array.length).fill({ _id: "", option: "", isCorrect: false })
-  );
-  let demo=Array(array.length).fill({ _id: "", option: "", isCorrect: false })
+  // const [options, setOptions] = useState(
+  //   Array(array.length).fill({ _id: "", option: "", isCorrect: false })
+  // );
+  // let demo = Array(array.length).fill({
+  //   _id: "",
+  //   option: "",
+  //   isCorrect: false,
+  // });
 
   /* ----------------------------- Question Object------------------------------------ */
+  const [arrayOption, setArrayoptions] = useState([1, 2]);
 
   const [question, setQuestion] = useState({
     diffLevel: "Hard",
-    options: [],
+    options: [
+      {
+        option: "",
+        isCorrect: false,
+        richTextEditor: false,
+      },
+      {
+        option: "",
+        isCorrect: false,
+        option: "",
+        isCorrect: false,
+        richTextEditor: false,
+      },
+      {
+        option: "",
+        isCorrect: false,
+        option: "",
+        isCorrect: false,
+        richTextEditor: false,
+      },
+      {
+        option: "",
+        isCorrect: false,
+        option: "",
+        isCorrect: false,
+        richTextEditor: false,
+      },
+    ],
+
     questionText: "",
     rightMarks: 1,
     subject: "",
     topic: "",
     type: "MULTIPLE RESPONSE",
     wrongMarks: 0,
+  });
+  const [subjectDisplay, setSubjectDisplay] = useState({
+    subject: "",
+    topic: "",
   });
 
   /* ----------------------------- To fetch Subject API ------------------------------------ */
@@ -43,7 +81,14 @@ function AddQuetion() {
     }
     fetchdata();
   }, [subjectID]);
-
+  console.log({ ...question });
+  /* ----------------------------- post request------------------------------------ */
+  async function sendData() {
+    setLoading(true);
+    const request1 = await http.post(`questions`, { ...question });
+    setPostConfirm(request1.data_id);
+  }
+  console.log(postConfirm);
   /* ----------------------------- To fetch Topic API------------------------------------ */
 
   useEffect(() => {
@@ -52,9 +97,69 @@ function AddQuetion() {
       const request1 = await http.get(`topics/subject/${subjectID}`);
       setTopicData(request1.data);
       setLoading(false);
+
     }
     fetchdata();
   }, [subjectID]);
+  
+  // useEffect(()=>{
+  //   handleValidation()
+  // },[question])
+    /* ----------------------------- Form validation ------------------------------------ */
+   function handleValidation() {
+      let fields = question;
+      let formIsValid = true;
+  
+      //Name
+      if (!question.subject) {
+        formIsValid = false;
+         setErrors({...errors,subject:"Cannot be empty"})
+      }
+     
+      if (!fields.topic) {
+        formIsValid = false;
+        errors.subject = "Cannot be empty";
+      }
+
+      if (!fields.questionText) {
+        formIsValid = false;
+        errors.subject = "Cannot be empty";
+      }
+
+      setErrors(errors)
+      
+    return formIsValid
+  
+      // if (typeof fields["name"] !== "undefined") {
+      //   if (!fields["name"].match(/^[a-zA-Z]+$/)) {
+      //     formIsValid = false;
+      //     errors["name"] = "Only letters";
+      //   }
+      // }
+  
+      //Email
+      // if (!fields["email"]) {
+      //   formIsValid = false;
+      //   errors["email"] = "Cannot be empty";
+      // }
+  
+      // if (typeof fields["email"] !== "undefined") {
+      //   let lastAtPos = fields["email"].lastIndexOf("@");
+      //   let lastDotPos = fields["email"].lastIndexOf(".");
+  
+      //   if (
+      //     !(
+      //       lastAtPos < lastDotPos &&
+      //       lastAtPos > 0 &&
+      //       fields["email"].indexOf("@@") == -1 &&
+      //       lastDotPos > 2 &&
+      //       fields["email"].length - lastDotPos > 2
+      //     )
+      //   ) {
+      //     formIsValid = false;
+      //     errors["email"] = "Email is not valid";
+      //   }
+      }
 
   /* ----------------------------- Subject DataList------------------------------------ */
 
@@ -97,8 +202,11 @@ function AddQuetion() {
 
     for (let i = 0; i < subjectData.result.length; i++) {
       if (event.target.value == subjectData.result[i].name) {
-        setQuestion({ ...question, subject: subjectData.result[i].name });
-
+        setQuestion({ ...question, subject: subjectData.result[i]._id });
+        setSubjectDisplay({
+          ...subjectDisplay,
+          subject: subjectData.result[i].name,
+        });
         setSubjectId(subjectData.result[i]._id);
       }
     }
@@ -108,10 +216,11 @@ function AddQuetion() {
 
   const handleTopicClick = (event) => {
     setQuestion({ ...question, topic: event.target.value });
-
+    console.log(subjectData);
     for (let i = 0; i < topicData.length; i++) {
       if (event.target.value == topicData[i].name) {
-        setQuestion({ ...question, topic: topicData[i].name });
+        setQuestion({ ...question, topic: topicData[i]._id });
+        setSubjectDisplay({ ...subjectDisplay, topic: topicData[i].name });
       }
     }
   };
@@ -186,12 +295,16 @@ function AddQuetion() {
   function handleChange(event) {
     console.log(event.target.name);
     console.log(event.target.value);
-    console.log(options);
 
-   demo[event.target.name].option=event.target.value
-
-
-    // setOptions((prev) => 
+    let array = { ...question.options[event.target.name] };
+    console.log(array);
+    array.option = event.target.value;
+    console.log(array);
+    let array1 = [...question.options];
+    array1[event.target.name] = array;
+    setQuestion({ ...question, options: array1 });
+    console.log(question);
+    // setOptions((prev) =>
     //   [...prev
     //   (prev[event.target.name] = {
     //     _id: event.target.id,
@@ -199,31 +312,43 @@ function AddQuetion() {
     //     isCorrect: false,
     //   })],
     // );
-
-   
   }
 
-  
-  console.log(demo)
+  console.log(question);
 
   function handleRadioClick(event) {
-    console.log(event.target.id);
-    let array2 = options.slice();
-    let array = array2[event.target.name];
-    array.isCorrect = Boolean(event.target.value);
-    array2[event.target.name] = array;
-    // setOptions(array2);
+  
+    console.log(event.target.checked);
+    let array = { ...question.options[event.target.id] };
+    console.log("HELLO by");
+    array.isCorrect = event.target.checked;
+    console.log(array);
+    let array1 = [...question.options];
+    array1[event.target.id] = array;
+    console.log(array1[event.target.id]);
+    setQuestion({ ...question, options: array1 });
+    console.log(question.options);
+
+    // let array = {...question.options[event.target.id]}
+    // console.log(array)
+    // array.isCorrect = Boolean(event.target.value);
+    // console.log(array);
+    // let array1=[...question.options]
+    // array1[event.target.id]=array
+    // setQuestion({...question,options:array1})
+    console.log(question);
   }
+  console.log(question.options);
 
   function handleCheckboxClick(event) {
-    console.log(event.target.id);
-
-    console.log(options);
-    let array2 = options.slice();
-    let array = array2[event.target.name];
+    let array = { ...question.options[event.target.name] };
+    console.log(array);
     array.isCorrect = event.target.checked;
-    array2[event.target.name] = array;
-    // setOptions(array2);
+    console.log(array);
+    let array1 = [...question.options];
+    array1[event.target.name] = array;
+    setQuestion({ ...question, options: array1 });
+    console.log(question);
   }
 
   /* ----------------------------- Try ------------------------------------ */
@@ -284,8 +409,15 @@ function AddQuetion() {
 
   /* ----------------------------- Try2 ------------------------------------ */
 
-  function optionDisplay() {
-    let index1 = 0;
+  function deleteOption(index) {
+    console.log(index);
+
+    let array1 = [...question.options];
+    array1.splice(index, 1);
+    setQuestion({ ...question, options: array1 });
+  }
+
+  function optionDisplay(index1) {
     const unique_id = uuid();
     const small_id = unique_id.slice(0, 8);
 
@@ -296,19 +428,21 @@ function AddQuetion() {
             <input
               type="checkbox"
               id={`${small_id}`}
-              // name={index}
-              // checked={options[index].isCorrect}
+              name={index1}
+              checked={question.options[index1].isCorrect}
               onChange={(event) => {
                 handleCheckboxClick(event);
               }}
             />
           ) : (
             <input
-              // name={index}
-              id={`${small_id}`}
-              // name="option"
+              id={index1}
+              // id={`${small_id}`}
+              name={`option`}
               // key={`${index}`}
-              // value={options[index].isCorrect}
+              // checked={question.options[index1].isCorrect}
+
+              defaultChecked={question.options[index1].isCorrect}
               type="radio"
               onClick={(event) => {
                 handleRadioClick(event);
@@ -316,7 +450,7 @@ function AddQuetion() {
             />
           )}
           &nbsp;
-          <label for="optionRender"> option </label>
+          <label for="optionRender"> option{index1+1} </label>
         </span>
         <textarea
           name={index1}
@@ -324,15 +458,24 @@ function AddQuetion() {
           required="required"
           data-error="Please, leave us a message."
           type="text"
-          // value={options[index].option}
+          value={question.options[index1].option}
           onChange={(event) => {
             handleChange(event);
           }}
           className="form-control"
         />
+        <button
+          id={index1}
+          onClick={() => {
+            deleteOption(index1);
+          }}
+        >
+          delete Option
+        </button>
       </div>
     );
   }
+  console.log(arrayOption);
 
   /* ----------------------------- Html ------------------------------------ */
 
@@ -359,7 +502,7 @@ function AddQuetion() {
                               type="text"
                               list="select_question1"
                               id="form_name"
-                              value={question.subject}
+                              value={subjectDisplay.subject}
                               onChange={handleSubjectClick}
                               class="form-control"
                               placeholder="Type to search Subject"
@@ -367,6 +510,8 @@ function AddQuetion() {
                               data-error="Firstname is required."
                               placeholder="Search topic here "
                             />
+                         <span style={{ color: "red" }}>{errors.subject} </span>
+
                             <button
                               onClick={() => {
                                 setQuestion({
@@ -374,6 +519,12 @@ function AddQuetion() {
                                   subject: "",
                                   topic: "",
                                 });
+                                setSubjectDisplay({ subject: "", topic: "" });
+                                setSubjectDisplay({
+                                  ...subjectDisplay,
+                                  topic: "",
+                                });
+
                                 setSubjectId("");
                               }}
                               type="reset"
@@ -392,12 +543,11 @@ function AddQuetion() {
                           <form className="form2">
                             <label for="form_name">Select Topic</label>{" "}
                             <input
-                              value={data && data.topic.name}
                               type="text"
                               list="select_topic"
                               id="form_name"
                               onChange={handleTopicClick}
-                              value={question.topic}
+                              value={subjectDisplay.topic}
                               // onFocus={clear}
                               className="form-control"
                               placeholder="Type to search Subject"
@@ -408,6 +558,10 @@ function AddQuetion() {
                             <button
                               onClick={() => {
                                 setQuestion({ ...question, topic: "" });
+                                setSubjectDisplay({
+                                  ...subjectDisplay,
+                                  topic: "",
+                                });
                               }}
                               type="reset"
                             >
@@ -516,9 +670,9 @@ function AddQuetion() {
                         <div className="col-md-6">
                           <div className="form-group">
                             {" "}
-                            <label for="form_lastname">Wrong Marks</label>{" "}
+                            <label for="wrongMarks">Wrong Marks</label>{" "}
                             <input
-                              id="form_lastname"
+                              id="wrongMarks"
                               value={question.wrongMarks}
                               type="number"
                               onChange={(event) => {
@@ -558,8 +712,7 @@ function AddQuetion() {
                             data-error="Please, leave us a message."
                           ></textarea>{" "}
                           <label for="basic-addon1 ">Options</label>{" "}
-                          
-                            {/* /* {array.map((prev) => {
+                          {/* /* {array.map((prev) => {
                                const index=array.indexOf(prev)
 
                             return(
@@ -577,11 +730,13 @@ function AddQuetion() {
                                 handleCheckboxClick(event);
                               }}
                             />);
-                          })} */ }
-                            
-                               <div>{optionDisplay()}</div>
-                          
-                          
+                          })} */}
+                          <div>
+                            {question.options.map((prev) => {
+                              const index = question.options.indexOf(prev);
+                              return optionDisplay(index);
+                            })}
+                          </div>
                         </div>
                       </div>
                       <div className="row " style={{ textAlign: "left" }}>
@@ -591,7 +746,12 @@ function AddQuetion() {
                             className="btn btn-outline-success btn-lg "
                             type="submit"
                             onClick={() => {
-                              setQuestion({ ...question, options: options });
+                              // sendData();  
+                              if(handleValidation()) {
+                                console.log(errors);
+                              } else {
+                                console.log(errors);
+                              }
                             }}
                           >
                             Submit
@@ -608,7 +768,22 @@ function AddQuetion() {
                     </div>
                   </div>
                 </div>
-                <button className="btn btn-outline-white  btn-lg ">
+                <button
+                  onClick={() => {
+                    let count = question.options.length;
+
+                    let array = {
+                      option: "",
+                      isCorrect: false,
+                      richTextEditor: false,
+                    };
+
+                    let array1 = [...question.options];
+                    array1.push(array);
+                    setQuestion({ ...question, options: array1 });
+                  }}
+                  className="btn btn-outline-white  btn-lg "
+                >
                   + Add Option
                 </button>
               </div>
