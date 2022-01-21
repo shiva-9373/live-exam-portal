@@ -157,8 +157,17 @@ label {
   margin-left: 10px;
   margin-right: 10px
 }
+/* .form2  input:not(:focus) + button {
+  opacity: 0;
+  pointer-events: none;
+  /* touch-action: none; */
+ */
 
 
+.form2 input:placeholder-shown+button {
+  opacity: 0;
+  pointer-events: none;
+}
 .form2 {
   position: relative;
   width: 200px;
@@ -183,11 +192,11 @@ label {
   line-height: 16px;
   font-size: 12px;
   border-radius: 50%;
-  top: 30px;
+  top: 0;
   bottom: 0;
-  left: 230px;
+  right: 5px;
   margin: auto;
-  background: rgb(231, 6, 6);
+  background: #ddd;
   padding: 0;
   outline: none;
   cursor: pointer;

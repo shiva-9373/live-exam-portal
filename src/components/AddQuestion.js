@@ -1,32 +1,19 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar";
 import http from "../services/http_common";
-import OptionRender from "./OptionRender";
 import { v4 as uuid } from "uuid";
 
-function AddQuetion() {
-  const [data, setData] = useState();
+function AddQuestion() {
   const [loading, setLoading] = useState(true);
   const [subjectData, setSubjectData] = useState();
   const [subjectID, setSubjectId] = useState("");
   const [topicData, setTopicData] = useState();
   const typeArray = ["MULTIPLE CHOICE", "MULTIPLE RESPONSE", "FILL IN BLANKS"];
   const difficultyArray = ["Easy", "Medium", "Hard"];
-  const [postConfirm, setPostConfirm] = useState();
-  const[errors,setErrors]=useState({subject:""})
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [isValid,setIsValid]=useState(false)
 
-  // const [options, setOptions] = useState(
-  //   Array(array.length).fill({ _id: "", option: "", isCorrect: false })
-  // );
-  // let demo = Array(array.length).fill({
-  //   _id: "",
-  //   option: "",
-  //   isCorrect: false,
-  // });
-
+  const [formErrors, setFormErrors] = useState({});
   /* ----------------------------- Question Object------------------------------------ */
-  const [arrayOption, setArrayoptions] = useState([1, 2]);
-
   const [question, setQuestion] = useState({
     diffLevel: "Hard",
     options: [
@@ -38,20 +25,14 @@ function AddQuetion() {
       {
         option: "",
         isCorrect: false,
-        option: "",
-        isCorrect: false,
         richTextEditor: false,
       },
       {
         option: "",
         isCorrect: false,
-        option: "",
-        isCorrect: false,
         richTextEditor: false,
       },
       {
-        option: "",
-        isCorrect: false,
         option: "",
         isCorrect: false,
         richTextEditor: false,
@@ -81,14 +62,11 @@ function AddQuetion() {
     }
     fetchdata();
   }, [subjectID]);
-  console.log({ ...question });
   /* ----------------------------- post request------------------------------------ */
   async function sendData() {
     setLoading(true);
     const request1 = await http.post(`questions`, { ...question });
-    setPostConfirm(request1.data_id);
   }
-  console.log(postConfirm);
   /* ----------------------------- To fetch Topic API------------------------------------ */
 
   useEffect(() => {
@@ -97,69 +75,122 @@ function AddQuetion() {
       const request1 = await http.get(`topics/subject/${subjectID}`);
       setTopicData(request1.data);
       setLoading(false);
-
     }
     fetchdata();
   }, [subjectID]);
-  
-  // useEffect(()=>{
-  //   handleValidation()
-  // },[question])
-    /* ----------------------------- Form validation ------------------------------------ */
-   function handleValidation() {
-      let fields = question;
-      let formIsValid = true;
-  
-      //Name
-      if (!question.subject) {
-        formIsValid = false;
-         setErrors({...errors,subject:"Cannot be empty"})
-      }
+  /* ----------------------------- Handle Sub,it button Click ------------------------------------ */
+
+  const handleSubmit = (e) => {
+    setFormErrors(validate(question));
+    setIsSubmit(true);
+    if(formErrors.decision &&   !formErrors.flag ){
      
-      if (!fields.topic) {
-        formIsValid = false;
-        errors.subject = "Cannot be empty";
+      setIsValid(true)
+      }else{
+        setIsValid(false)
+  
       }
+      if(isValid){
+        sendData()
+      }
+  };
+  console.log(isValid);
+  console.log(formErrors);
 
-      if (!fields.questionText) {
-        formIsValid = false;
-        errors.subject = "Cannot be empty";
-      }
 
-      setErrors(errors)
-      
-    return formIsValid
-  
-      // if (typeof fields["name"] !== "undefined") {
-      //   if (!fields["name"].match(/^[a-zA-Z]+$/)) {
-      //     formIsValid = false;
-      //     errors["name"] = "Only letters";
-      //   }
-      // }
-  
-      //Email
-      // if (!fields["email"]) {
-      //   formIsValid = false;
-      //   errors["email"] = "Cannot be empty";
-      // }
-  
-      // if (typeof fields["email"] !== "undefined") {
-      //   let lastAtPos = fields["email"].lastIndexOf("@");
-      //   let lastDotPos = fields["email"].lastIndexOf(".");
-  
-      //   if (
-      //     !(
-      //       lastAtPos < lastDotPos &&
-      //       lastAtPos > 0 &&
-      //       fields["email"].indexOf("@@") == -1 &&
-      //       lastDotPos > 2 &&
-      //       fields["email"].length - lastDotPos > 2
-      //     )
-      //   ) {
-      //     formIsValid = false;
-      //     errors["email"] = "Email is not valid";
-      //   }
+  /* ----------------------------- Form validation ------------------------------------ */
+  const validate = (values) => {
+    const errors = {};
+    errors.decision=true
+    errors.flag=false
+    const count=0
+    let array=[]
+    console.log(question.subject);
+    console.log(!values.subject ? "hello" : "bye");
+    if (!values.subject) {
+      errors.subject = "subject is required!";
+      errors.decision=false
+
+    } else {
+      errors.subject = "";
+    }
+    if (!question.topic) {
+      errors.topic = "topic is required!";
+      errors.decision=false
+
+    } else {
+      errors.topic = "";
+    }
+    if (!question.questionText) {
+      errors.questionText = "question is required";
+      errors.decision=false
+
+    } else {
+      errors.questionText = "";
+    }
+    if (!question.diffLevel) {
+      errors.diffLevel = "Difficulty level is required";
+      errors.decision=false
+
+    } else {
+      errors.diffLevel = "";
+    }
+    // if (!question.type) {
+    //   errors.type = "Type level is required";
+    //   errors.decision=false
+
+    // } else {
+    //   errors.type = "";
+    // }
+    if (!question.rightMarks) {
+      errors.rightMarks = "Right Marks level is required";
+      errors.decision=false
+
+    } else {
+      errors.rightMarks = "";
+    }
+
+    if ( question.wrongMarks!==0 && !question.wrongMarks ) {
+      errors.wrongMarks = "Wrong marks  is required";
+      errors.decision=false
+
+    } else {
+      errors.wrongMarks = "";
+    }
+    question.options.map((prev, index) => {
+      if (!prev.option) {
+        array.push( "option required");
+        errors.decision=false
+
+      } else {
+        array.push( "");
       }
+      if(prev.isCorrect){
+          errors.correct=true
+
+      }
+      console.log(prev.option)
+      console.log(question.options[index+1])
+      for(let a=index+1;a<question.options.length;a++){
+      if( prev.option===question.options[a].option){
+        errors.flag=true
+      }}
+    });
+
+errors.option=array
+if(errors.decision &&   !errors.flag ){
+     
+  setIsValid(true)
+  }else{
+    setIsValid(false)
+
+  }
+    return errors;
+  };
+
+  useEffect(() => {
+    setFormErrors(validate(question));
+  }, [question, isSubmit]);
 
   /* ----------------------------- Subject DataList------------------------------------ */
 
@@ -170,15 +201,7 @@ function AddQuetion() {
       });
       return array;
     }
-    return (
-      <div>
-        <option value="Web Designing" />
-        <option value="Web Development" />
-        <option value="IOS App Development" />
-        <option value="Wordpress Site" />
-        <option value="" />
-      </div>
-    );
+    return <div></div>;
   }
   /* ----------------------------- Topic DataList------------------------------------ */
 
@@ -199,6 +222,10 @@ function AddQuetion() {
 
   const handleSubjectClick = (event) => {
     setQuestion({ ...question, subject: event.target.value });
+    setSubjectDisplay({
+      ...subjectDisplay,
+      subject: event.target.value,
+    });
 
     for (let i = 0; i < subjectData.result.length; i++) {
       if (event.target.value == subjectData.result[i].name) {
@@ -207,6 +234,7 @@ function AddQuetion() {
           ...subjectDisplay,
           subject: subjectData.result[i].name,
         });
+
         setSubjectId(subjectData.result[i]._id);
       }
     }
@@ -216,7 +244,12 @@ function AddQuetion() {
 
   const handleTopicClick = (event) => {
     setQuestion({ ...question, topic: event.target.value });
-    console.log(subjectData);
+
+    setSubjectDisplay({
+      ...subjectDisplay,
+      topic: event.target.value,
+    });
+
     for (let i = 0; i < topicData.length; i++) {
       if (event.target.value == topicData[i].name) {
         setQuestion({ ...question, topic: topicData[i]._id });
@@ -229,6 +262,7 @@ function AddQuetion() {
 
   const handleTypeClick = (event) => {
     setQuestion({ ...question, type: event.target.value });
+
     for (let i = 0; i < typeArray.length; i++) {
       if (event.target.value == typeArray[i]) {
         setQuestion({ ...question, type: typeArray[i] });
@@ -240,6 +274,7 @@ function AddQuetion() {
 
   const handleDiffClick = (event) => {
     setQuestion({ ...question, diffLevel: event.target.value });
+
     for (let i = 0; i < difficultyArray.length; i++) {
       if (event.target.value == difficultyArray[i]) {
         setQuestion({ ...question, diffLevel: difficultyArray[i] });
@@ -247,175 +282,39 @@ function AddQuetion() {
     }
   };
 
-  /* ----------------------------- To Render Options ------------------------------------ */
-  // function optionRender() {
-  //   let count = 0;
-  //   let optionId = { _id: "", option: "", isCorrect: false };
-  //   let final=[]
-
-  //   const renderOptionArray = array.map((prev) => {
-  //     // setOptionObject({...optionObject,_id:count})
-  //     optionId._id = count;
-  //     final.push(optionId)
-  //     return (
-  //       <div class="input-group mb-3">
-  //         <span class="input-group-text" id="basic-addon1">
-  //           <input
-  //             name="option"
-  //             id={count}
-  //             key={count}
-  //             type={
-  //               question.type === "MULTIPLE RESPONSE" ? "checkbox" : "radio"
-  //             }
-  //           />
-  //           &nbsp;
-  //           <label for="optionRender"> option {count}</label>
-  //         </span>
-  //         <textarea
-  //           required="required"
-  //           data-error="Please, leave us a message."
-  //           type="text"
-  //           id=""
-  //           value={prev.option}
-  //           onChange={() => {}}
-  //           className="form-control"
-  //           placeholder="Username"
-  //           aria-label="Username"
-  //           aria-describedby="basic-addon1"
-  //         />
-  //       </div>
-  //     );
-  //   })
-
-  //   return(renderOptionArray);
-  // }
-  //   setQuestion({...question,options:optionArray})
-  /* ----------------------------- render option ------------------------------------ */
-
   function handleChange(event) {
-    console.log(event.target.name);
-    console.log(event.target.value);
-
     let array = { ...question.options[event.target.name] };
-    console.log(array);
     array.option = event.target.value;
-    console.log(array);
     let array1 = [...question.options];
     array1[event.target.name] = array;
     setQuestion({ ...question, options: array1 });
-    console.log(question);
-    // setOptions((prev) =>
-    //   [...prev
-    //   (prev[event.target.name] = {
-    //     _id: event.target.id,
-    //     option: event.target.value,
-    //     isCorrect: false,
-    //   })],
-    // );
   }
-
-  console.log(question);
 
   function handleRadioClick(event) {
-  
-    console.log(event.target.checked);
     let array = { ...question.options[event.target.id] };
-    console.log("HELLO by");
     array.isCorrect = event.target.checked;
-    console.log(array);
     let array1 = [...question.options];
     array1[event.target.id] = array;
-    console.log(array1[event.target.id]);
     setQuestion({ ...question, options: array1 });
-    console.log(question.options);
-
-    // let array = {...question.options[event.target.id]}
-    // console.log(array)
-    // array.isCorrect = Boolean(event.target.value);
-    // console.log(array);
-    // let array1=[...question.options]
-    // array1[event.target.id]=array
-    // setQuestion({...question,options:array1})
-    console.log(question);
   }
-  console.log(question.options);
 
   function handleCheckboxClick(event) {
     let array = { ...question.options[event.target.name] };
-    console.log(array);
     array.isCorrect = event.target.checked;
-    console.log(array);
     let array1 = [...question.options];
     array1[event.target.name] = array;
     setQuestion({ ...question, options: array1 });
-    console.log(question);
   }
 
-  /* ----------------------------- Try ------------------------------------ */
-
-  // function optionDisplay() {
-  //   let count = 0;
-  //   return array.map((prev) => {
-  //     const index = array.indexOf(prev);
-  //     console.log(index);
-  //     const unique_id = uuid();
-  //     const small_id = unique_id.slice(0, 8);
-
-  //     return (
-  //       <div class="input-group mb-3">
-  //         <span class="input-group-text" id="basic-addon1">
-  //           {question.type === "MULTIPLE RESPONSE" ? (
-  //             <input
-  //               type="checkbox"
-  //               id={`${small_id}${index}`}
-  //               name={index}
-  //               checked={options[index].isCorrect}
-  //               onChange={(event) => {
-  //                 handleCheckboxClick(event);
-  //               }}
-  //             />
-  //           ) : (
-  //             <input
-  //               name={index}
-  //               id={`${small_id}${index}`}
-  //               // name="option"
-  //               key={`${index}`}
-  //               value={options[index].isCorrect}
-  //               type="radio"
-  //               onClick={(event) => {
-  //                 handleRadioClick(event);
-  //               }}
-  //             />
-  //           )}
-  //           &nbsp;
-  //           <label for="optionRender"> option {++count}</label>
-  //         </span>
-  //         <textarea
-  //           name={index}
-  //           id={`${small_id}${index + 1}`}
-  //           required="required"
-  //           data-error="Please, leave us a message."
-  //           type="text"
-  //           value={options[index].option}
-  //           onChange={(event) => {
-  //             handleChange(event);
-  //           }}
-  //           className="form-control"
-  //         />
-  //       </div>
-  //     );
-  //   });
-  // }
-
-  /* ----------------------------- Try2 ------------------------------------ */
+  /* ----------------------------- deleteOption ------------------------------------ */
 
   function deleteOption(index) {
-    console.log(index);
-
     let array1 = [...question.options];
     array1.splice(index, 1);
     setQuestion({ ...question, options: array1 });
   }
+
+  /* ----------------------------- render option ------------------------------------ */
 
   function optionDisplay(index1) {
     const unique_id = uuid();
@@ -437,11 +336,7 @@ function AddQuetion() {
           ) : (
             <input
               id={index1}
-              // id={`${small_id}`}
               name={`option`}
-              // key={`${index}`}
-              // checked={question.options[index1].isCorrect}
-
               defaultChecked={question.options[index1].isCorrect}
               type="radio"
               onClick={(event) => {
@@ -450,7 +345,7 @@ function AddQuetion() {
             />
           )}
           &nbsp;
-          <label for="optionRender"> option{index1+1} </label>
+          <label for="optionRender"> option{index1 + 1} </label>
         </span>
         <textarea
           name={index1}
@@ -464,6 +359,10 @@ function AddQuetion() {
           }}
           className="form-control"
         />
+        <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.option[index1] : ""}{" "}
+                            </span>
+
         <button
           id={index1}
           onClick={() => {
@@ -475,7 +374,6 @@ function AddQuetion() {
       </div>
     );
   }
-  console.log(arrayOption);
 
   /* ----------------------------- Html ------------------------------------ */
 
@@ -508,11 +406,12 @@ function AddQuetion() {
                               placeholder="Type to search Subject"
                               required="required"
                               data-error="Firstname is required."
-                              placeholder="Search topic here "
                             />
-                         <span style={{ color: "red" }}>{errors.subject} </span>
-
+                            <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.subject : ""}{" "}
+                            </span>
                             <button
+                              type="reset"
                               onClick={() => {
                                 setQuestion({
                                   ...question,
@@ -520,14 +419,8 @@ function AddQuetion() {
                                   topic: "",
                                 });
                                 setSubjectDisplay({ subject: "", topic: "" });
-                                setSubjectDisplay({
-                                  ...subjectDisplay,
-                                  topic: "",
-                                });
-
                                 setSubjectId("");
                               }}
-                              type="reset"
                             >
                               &times;
                             </button>
@@ -555,6 +448,9 @@ function AddQuetion() {
                               data-error="Firstname is required."
                               placeholder="Search topic here "
                             />
+                            {/* <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.subject : ""}{" "}
+                            </span>{" "} */}
                             <button
                               onClick={() => {
                                 setQuestion({ ...question, topic: "" });
@@ -593,6 +489,9 @@ function AddQuetion() {
                               data-error="Firstname is required."
                               placeholder="Search topic here "
                             />
+                            <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.type : ""}{" "}
+                            </span>{" "}
                             <button
                               onClick={() => {
                                 setQuestion({ ...question, type: "" });
@@ -629,6 +528,9 @@ function AddQuetion() {
                               data-error="Firstname is required."
                               placeholder="Search topic here "
                             />
+                            <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.type : ""}{" "}
+                            </span>{" "}
                             <button
                               onClick={() => {
                                 setQuestion({ ...question, diffLevel: "" });
@@ -686,7 +588,9 @@ function AddQuetion() {
                               placeholder="Please enter Right Marks "
                               required="required"
                               data-error="Lastname is required."
-                            />{" "}
+                            /><span style={{ color: "red" }}>
+                            {isSubmit ? formErrors.wrongMarks : ""}{" "}
+                          </span>{" "}
                           </div>
                         </div>
                       </div>
@@ -711,26 +615,11 @@ function AddQuetion() {
                             required="required"
                             data-error="Please, leave us a message."
                           ></textarea>{" "}
+                          <span style={{ color: "red" }}>
+                            {isSubmit ? formErrors.questionText : ""}{" "}
+                          </span>
+                          <br/>
                           <label for="basic-addon1 ">Options</label>{" "}
-                          {/* /* {array.map((prev) => {
-                               const index=array.indexOf(prev)
-
-                            return(
-                            <OptionRender
-                              question={question}
-                              options={options}
-                              index={index}
-                              handleChange={(event) => {
-                                handleChange(event);
-                              }}
-                              handleRadioClick={(event) => {
-                                handleRadioClick(event);
-                              }}
-                              handleCheckboxClick={(event) => {
-                                handleCheckboxClick(event);
-                              }}
-                            />);
-                          })} */}
                           <div>
                             {question.options.map((prev) => {
                               const index = question.options.indexOf(prev);
@@ -745,14 +634,7 @@ function AddQuetion() {
                           <button
                             className="btn btn-outline-success btn-lg "
                             type="submit"
-                            onClick={() => {
-                              // sendData();  
-                              if(handleValidation()) {
-                                console.log(errors);
-                              } else {
-                                console.log(errors);
-                              }
-                            }}
+                            onClick={handleSubmit}
                           >
                             Submit
                           </button>
@@ -763,6 +645,10 @@ function AddQuetion() {
                           >
                             Cancel
                           </button>
+                          <span style={{ color: "red" }}>
+                            {(isSubmit &&  formErrors.decision )   ?    !formErrors.correct && "Please provide correct option":""}
+                            {(isSubmit  )   ?    formErrors.flag && "Duplicate options are not allowed.Please select correct answer from options":""}{" "}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -770,14 +656,11 @@ function AddQuetion() {
                 </div>
                 <button
                   onClick={() => {
-                    let count = question.options.length;
-
                     let array = {
                       option: "",
                       isCorrect: false,
                       richTextEditor: false,
                     };
-
                     let array1 = [...question.options];
                     array1.push(array);
                     setQuestion({ ...question, options: array1 });
@@ -795,4 +678,4 @@ function AddQuetion() {
   );
 }
 
-export default AddQuetion;
+export default AddQuestion;

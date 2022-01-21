@@ -43,7 +43,7 @@ function RenderQuetion(props) {
               data-placement="top"
               title="Edit"
             >{<img src="https://img.icons8.com/material-rounded/14/000000/edit--v1.png"/>  }
-            <Link to={{pathname:`/addquestion/${prev1._id}`, state:"hello" }}   >edit</Link>  
+            <Link to={{pathname:`/editquestion/${prev1._id}`, state:"hello" }}   >edit</Link>  
             </button>
             <button
               class="btn btn-white btn-sm rounded-1 ml-1"

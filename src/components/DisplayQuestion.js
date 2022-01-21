@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import RenderQuetion from "./RenderQuetion";
-import Pagination from "./Pagination";
 import ReactPaginate from "react-paginate";
-import { Link } from "react-router-dom";
-import service from "../services/service";
+import { Link,useParams } from "react-router-dom";
 import http from "../services/http_common";
 
-function DisplayQuetions2(props) {
+function DisplayQuetions(props) {
+  
+  // let { id } = useParams();
+  // if(id ? id:"")
+  
+  // console.log(id)
+
   const [data, setData] = useState();
   const [topic, setTopic] = useState();
   const [loading, setLoading] = useState(true);
@@ -18,19 +22,7 @@ function DisplayQuetions2(props) {
   const [term, setTerm] = useState("");
   const [deleteQueId, setDeleteQueId] = useState("");
 
-  //   useEffect(() => {
-  //     setLoading(true);
-  //     fetch('/api/data')
-  //       .then((res) => res.json())
-  //       .then((data) => {
-  //         setData(data);
-  //       })
-  //       .catch((err) => {
-  //       })
-  //       .finally(() => {
-  //         setLoading(false);
-  //       });
-  //   }, []);
+ 
 
   useEffect(() => {
     async function fetchdata() {
@@ -59,7 +51,7 @@ function DisplayQuetions2(props) {
     async function fetchdata() {
       setLoading(true);
       const request1 = await http.get(
-        `questions?page=${offset}&limit=${countPerPage}&term=${term}&topic=${topicId}`
+        `questions?page=${offset}&limit=${countPerPage}&term=${term}&topic=${topicId }`
       );
       setData(request1.data);
       setLengthQuestion(request1.data.totalCount);
@@ -150,7 +142,7 @@ function DisplayQuetions2(props) {
       <div>
         <div className=" firstContainer d-flex">
           <h2 className="que">Quetions</h2>
-          <Link to={{pathname:`/addquestion1`,state:"hello" }}className="btn addButton btn-primary">
+          <Link to={{pathname:`/addquestion`,state:"hello" }}className="btn addButton btn-primary">
             + Add Quetion
           </Link>
         </div>
@@ -295,4 +287,4 @@ function DisplayQuetions2(props) {
   );
 }
 
-export default DisplayQuetions2;
+export default DisplayQuetions;
