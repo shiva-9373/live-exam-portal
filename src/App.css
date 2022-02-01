@@ -174,7 +174,7 @@ label {
 }
 
 .form2 input {
-  width: 280px;
+  width: 480px;
   box-sizing: border-box;
 }
 
@@ -192,15 +192,59 @@ label {
   line-height: 16px;
   font-size: 12px;
   border-radius: 50%;
-  top: 0;
+  top: 15px;
   bottom: 0;
-  right: 5px;
+  right: 0px;
+  left: 460px;
   margin: auto;
   background: #ddd;
   padding: 0;
   outline: none;
   cursor: pointer;
   transition: .1s;
+}
+
+
+.optionTextArea{
+  width: 700px;
+  height: 90px;
+}
+
+.questionDiv{
+  height: 100px;
+}
+
+.queTextArea{
+  height: 90px;
+}
+
+body {
+  background: white;
+  /* background: linear-gradient(to right, #0062E6, #33AEFF); */
+}
+
+.card-img-left {
+  width: 45%;
+  /* Link to your background image using in the property below! */
+  background: scroll center url('http://admin.liveexamcenter.in/assets/images/login.png');
+  background-size: cover;
+  background-color: #007bff;
+}
+
+.btn-login {
+  font-size: 0.9rem;
+  letter-spacing: 0.05rem;
+  padding: 0.75rem 1rem;
+}
+
+.btn-google {
+  color: white !important;
+  background-color: #ea4335;
+}
+
+.btn-facebook {
+  color: white !important;
+  background-color: #3b5998;
 }
 
 

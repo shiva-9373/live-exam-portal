@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import http from "../services/http_common";
 import { v4 as uuid } from "uuid";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import "react-quill/dist/quill.bubble.css";
+import { Link } from "react-router-dom";
 
 function AddQuestion() {
   const [loading, setLoading] = useState(true);
@@ -10,7 +14,7 @@ function AddQuestion() {
   const typeArray = ["MULTIPLE CHOICE", "MULTIPLE RESPONSE", "FILL IN BLANKS"];
   const difficultyArray = ["Easy", "Medium", "Hard"];
   const [isSubmit, setIsSubmit] = useState(false);
-  const [isValid,setIsValid]=useState(false)
+  const [isValid, setIsValid] = useState(false);
 
   const [formErrors, setFormErrors] = useState({});
   /* ----------------------------- Question Object------------------------------------ */
@@ -49,6 +53,7 @@ function AddQuestion() {
   const [subjectDisplay, setSubjectDisplay] = useState({
     subject: "",
     topic: "",
+    richTextEnable: false,
   });
 
   /* ----------------------------- To fetch Subject API ------------------------------------ */
@@ -83,55 +88,83 @@ function AddQuestion() {
   const handleSubmit = (e) => {
     setFormErrors(validate(question));
     setIsSubmit(true);
-    if(formErrors.decision &&   !formErrors.flag ){
-     
-      setIsValid(true)
-      }else{
-        setIsValid(false)
-  
-      }
-      if(isValid){
-        sendData()
-      }
-  };
-  console.log(isValid);
-  console.log(formErrors);
+    if (formErrors.decision && !formErrors.flag) {
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
+    if (isValid) {
+      sendData();
+      setIsSubmit(false);
 
+      setQuestion({
+        diffLevel: "Hard",
+        options: [
+          {
+            option: "",
+            isCorrect: false,
+            richTextEditor: false,
+          },
+          {
+            option: "",
+            isCorrect: false,
+            richTextEditor: false,
+          },
+          {
+            option: "",
+            isCorrect: false,
+            richTextEditor: false,
+          },
+          {
+            option: "",
+            isCorrect: false,
+            richTextEditor: false,
+          },
+        ],
+
+        questionText: "",
+        rightMarks: 1,
+        subject: "",
+        topic: "",
+        type: "MULTIPLE RESPONSE",
+        wrongMarks: 0,
+      });
+      setSubjectDisplay({
+        subject: "",
+        topic: "",
+      });
+    }
+  };
 
   /* ----------------------------- Form validation ------------------------------------ */
   const validate = (values) => {
     const errors = {};
-    errors.decision=true
-    errors.flag=false
-    const count=0
-    let array=[]
-    console.log(question.subject);
-    console.log(!values.subject ? "hello" : "bye");
+    errors.decision = true;
+    errors.flag = false;
+    const count = 0;
+    let array = [];
+
     if (!values.subject) {
       errors.subject = "subject is required!";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.subject = "";
     }
     if (!question.topic) {
       errors.topic = "topic is required!";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.topic = "";
     }
     if (!question.questionText) {
       errors.questionText = "question is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.questionText = "";
     }
     if (!question.diffLevel) {
       errors.diffLevel = "Difficulty level is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.diffLevel = "";
     }
@@ -144,47 +177,41 @@ function AddQuestion() {
     // }
     if (!question.rightMarks) {
       errors.rightMarks = "Right Marks level is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.rightMarks = "";
     }
 
-    if ( question.wrongMarks!==0 && !question.wrongMarks ) {
+    if (question.wrongMarks !== 0 && !question.wrongMarks) {
       errors.wrongMarks = "Wrong marks  is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.wrongMarks = "";
     }
     question.options.map((prev, index) => {
       if (!prev.option) {
-        array.push( "option required");
-        errors.decision=false
-
+        array.push("option required");
+        errors.decision = false;
       } else {
-        array.push( "");
+        array.push("");
       }
-      if(prev.isCorrect){
-          errors.correct=true
+      if (prev.isCorrect) {
+        errors.correct = true;
+      }
 
+      for (let a = index + 1; a < question.options.length; a++) {
+        if (prev.option === question.options[a].option) {
+          errors.flag = true;
+        }
       }
-      console.log(prev.option)
-      console.log(question.options[index+1])
-      for(let a=index+1;a<question.options.length;a++){
-      if( prev.option===question.options[a].option){
-        errors.flag=true
-      }}
     });
 
-errors.option=array
-if(errors.decision &&   !errors.flag ){
-     
-  setIsValid(true)
-  }else{
-    setIsValid(false)
-
-  }
+    errors.option = array;
+    if (errors.decision && !errors.flag) {
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
     return errors;
   };
 
@@ -201,7 +228,11 @@ if(errors.decision &&   !errors.flag ){
       });
       return array;
     }
-    return <div></div>;
+    return (
+      <div>
+        <option value="" />
+      </div>
+    );
   }
   /* ----------------------------- Topic DataList------------------------------------ */
 
@@ -290,14 +321,44 @@ if(errors.decision &&   !errors.flag ){
     setQuestion({ ...question, options: array1 });
   }
 
-  function handleRadioClick(event) {
-    let array = { ...question.options[event.target.id] };
-    array.isCorrect = event.target.checked;
+  function handleQuillChange(event, index1) {
+    let array = { ...question.options[index1] };
+    array.option = event;
+    array.richTextEditor = true;
     let array1 = [...question.options];
-    array1[event.target.id] = array;
+    array1[index1] = array;
     setQuestion({ ...question, options: array1 });
   }
+  console.log(question);
+  function handleRadioClick(event) {
+    let array1 = [...question.options];
 
+    for (let a = 0; a < question.options.length; a++) {
+      if (a == event.target.id) {
+        let array = array1[a];
+        array.isCorrect = true;
+        array1[a] = array;
+        // setQuestion({ ...question, options: array1 });
+
+        console.log("true case");
+        console.log(array1);
+      } else {
+        let array = array1[a];
+        array.isCorrect = false;
+        array1[a] = array;
+        console.log("false case");
+        console.log(array1);
+      }
+    }
+    console.log(array1);
+    setQuestion({ ...question, options: array1 });
+
+    // let array = { ...question.options[event.target.id] };
+    // array.isCorrect = event.target.checked;
+    // let array1 = [...question.options];
+    // array1[event.target.id] = array;
+    // setQuestion({ ...question, options: array1 });
+  }
   function handleCheckboxClick(event) {
     let array = { ...question.options[event.target.name] };
     array.isCorrect = event.target.checked;
@@ -314,63 +375,106 @@ if(errors.decision &&   !errors.flag ){
     setQuestion({ ...question, options: array1 });
   }
 
-  /* ----------------------------- render option ------------------------------------ */
+  /* ----------------------------- question rich text editor ------------------------------------ */
+  function handleRichText() {
+    setSubjectDisplay({
+      ...subjectDisplay,
+      richTextEnable: !subjectDisplay.richTextEnable,
+    });
+    console.log(subjectDisplay);
+  }
+  /* ----------------------------- options rich text editor ------------------------------------ */
 
+  function handleOptionRichText(event) {
+    console.log("hello");
+    console.log(event.target.id);
+    let array = { ...question.options[event.target.id] };
+    console.log(array.richTextEditor);
+    array.richTextEditor = !array.richTextEditor;
+    let array1 = [...question.options];
+    array1[event.target.id] = array;
+    setQuestion({ ...question, options: array1 });
+  }
+  /* ----------------------------- render option ------------------------------------ */
+  console.log(question.options);
   function optionDisplay(index1) {
     const unique_id = uuid();
     const small_id = unique_id.slice(0, 8);
 
     return (
-      <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">
-          {question.type === "MULTIPLE RESPONSE" ? (
-            <input
-              type="checkbox"
-              id={`${small_id}`}
-              name={index1}
-              checked={question.options[index1].isCorrect}
-              onChange={(event) => {
-                handleCheckboxClick(event);
-              }}
-            />
-          ) : (
-            <input
-              id={index1}
-              name={`option`}
-              defaultChecked={question.options[index1].isCorrect}
-              type="radio"
-              onClick={(event) => {
-                handleRadioClick(event);
-              }}
-            />
-          )}
-          &nbsp;
-          <label for="optionRender"> option{index1 + 1} </label>
-        </span>
-        <textarea
-          name={index1}
-          id={`${small_id}`}
-          required="required"
-          data-error="Please, leave us a message."
-          type="text"
-          value={question.options[index1].option}
-          onChange={(event) => {
-            handleChange(event);
-          }}
-          className="form-control"
-        />
+      <div>
+        <div class="input-group option  mt-2">
+          <span class="input-group-text" id="basic-addon1">
+            {question.type === "MULTIPLE RESPONSE" ? (
+              <input
+                type="checkbox"
+                id={`${small_id}`}
+                name={index1}
+                checked={question.options[index1].isCorrect}
+                onChange={(event) => {
+                  handleCheckboxClick(event);
+                }}
+              />
+            ) : (
+              <input
+                id={index1}
+                name={`option`}
+                defaultChecked={question.options[index1].isCorrect}
+                type="radio"
+                onClick={(event) => {
+                  handleRadioClick(event);
+                }}
+              />
+            )}
+            &nbsp;
+            <label for="optionRender"> option{index1 + 1} </label>
+          </span>
+          <div>
+            {question.options[index1].richTextEditor ? (
+              <ReactQuill
+                id={index1}
+                placeholder="insert text here"
+                theme="snow"
+                modules={AddQuestion.modules}
+                formats={AddQuestion.formats}
+                value={question.options[index1].option}
+                onChange={(event) => {
+                  handleQuillChange(event, index1);
+                }}
+              />
+            ) : (
+              <textarea
+                name={index1}
+                id={`${small_id}`}
+                className=" form-control optionTextArea"
+                type="text"
+                value={question.options[index1].option}
+                onChange={(event) => {
+                  handleChange(event);
+                }}
+                // className="form-control"
+              />
+            )}
+          </div>
+        </div>
+        &nbsp;
+        <span id={index1} onClick={handleOptionRichText}>
+          {question.options[index1].richTextEditor ? "disable" : "enable"} rich
+          text editor |
+        </span>{" "}
+        &nbsp;
         <span style={{ color: "red" }}>
-                              {isSubmit ? formErrors.option[index1] : ""}{" "}
-                            </span>
-
-        <button
+          {isSubmit ? formErrors.option[index1] : ""}{" "}
+        </span>
+        <span
           id={index1}
           onClick={() => {
             deleteOption(index1);
           }}
         >
           delete Option
-        </button>
+        </span>
+        &nbsp;
       </div>
     );
   }
@@ -381,19 +485,18 @@ if(errors.decision &&   !errors.flag ){
     <div className="container text-left">
       {" "}
       <div className=" text-left mt-5 ">
-        <h1>Edit Question</h1>
+        <h1>Add Question</h1>
       </div>
       <div className="row  " style={{ textAlign: "left" }}>
         <div className="col-lg-10 mx-auto">
-          <div className="card mt-2 mx-auto p-4 bg-light">
+          <div className="card mt-2 mx-auto  bg-light">
             <div className="card-body bg-light">
               <div className="container">
                 <div id="contact-form" role="form">
                   <div className="controls">
                     <div className="row">
                       <div className="col-md-6">
-                        <div className="form-group ">
-                          {" "}
+                        <div className="form-group  ">
                           <form className="form2">
                             <label for="form_name">Select Subject</label>{" "}
                             <input
@@ -405,7 +508,6 @@ if(errors.decision &&   !errors.flag ){
                               class="form-control"
                               placeholder="Type to search Subject"
                               required="required"
-                              data-error="Firstname is required."
                             />
                             <span style={{ color: "red" }}>
                               {isSubmit ? formErrors.subject : ""}{" "}
@@ -431,7 +533,7 @@ if(errors.decision &&   !errors.flag ){
                         </div>
                       </div>
                       <div className="col-md-6">
-                        <div className="form-group ">
+                        <div className="form-group">
                           {" "}
                           <form className="form2">
                             <label for="form_name">Select Topic</label>{" "}
@@ -444,9 +546,6 @@ if(errors.decision &&   !errors.flag ){
                               // onFocus={clear}
                               className="form-control"
                               placeholder="Type to search Subject"
-                              required="required"
-                              data-error="Firstname is required."
-                              placeholder="Search topic here "
                             />
                             {/* <span style={{ color: "red" }}>
                               {isSubmit ? formErrors.subject : ""}{" "}
@@ -588,9 +687,10 @@ if(errors.decision &&   !errors.flag ){
                               placeholder="Please enter Right Marks "
                               required="required"
                               data-error="Lastname is required."
-                            /><span style={{ color: "red" }}>
-                            {isSubmit ? formErrors.wrongMarks : ""}{" "}
-                          </span>{" "}
+                            />
+                            <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.wrongMarks : ""}{" "}
+                            </span>{" "}
                           </div>
                         </div>
                       </div>
@@ -600,25 +700,49 @@ if(errors.decision &&   !errors.flag ){
                         <div className="form-group">
                           {" "}
                           <label for="form_message ">Question</label>{" "}
-                          <textarea
-                            id="form_message"
-                            name="message"
-                            onChange={(event) => {
-                              setQuestion({
-                                ...question,
-                                questionText: event.target.value,
-                              });
-                            }}
-                            className="form-control"
-                            placeholder="Write your Question here."
-                            rows="2"
-                            required="required"
-                            data-error="Please, leave us a message."
-                          ></textarea>{" "}
+                          {subjectDisplay.richTextEnable ? (
+                            <ReactQuill
+                              placeholder="insert text here"
+                              theme="snow"
+                              modules={AddQuestion.modules}
+                              formats={AddQuestion.formats}
+                              value={question.questionText}
+                              onChange={(event) => {
+                                setQuestion({
+                                  ...question,
+                                  questionText: event,
+                                });
+                              }}
+                            />
+                          ) : (
+                            <textarea
+                              id="form_message"
+                              value={question.questionText}
+                              name="message"
+                              onChange={(event) => {
+                                setQuestion({
+                                  ...question,
+                                  questionText: event.target.value,
+                                });
+                              }}
+                              className="form-control"
+                              placeholder="Write your Question here."
+                              rows="2"
+                              required="required"
+                              data-error="Please, leave us a message."
+                            ></textarea>
+                          )}{" "}
                           <span style={{ color: "red" }}>
                             {isSubmit ? formErrors.questionText : ""}{" "}
                           </span>
-                          <br/>
+                          <span onClick={handleRichText}>
+                            {" "}
+                            {subjectDisplay.richTextEnable
+                              ? "disable"
+                              : "enable"}{" "}
+                            rich text editor
+                          </span>
+                          <br />
                           <label for="basic-addon1 ">Options</label>{" "}
                           <div>
                             {question.options.map((prev) => {
@@ -628,7 +752,24 @@ if(errors.decision &&   !errors.flag ){
                           </div>
                         </div>
                       </div>
+
                       <div className="row " style={{ textAlign: "left" }}>
+                        <button
+                          style={{ textAlign: "left" }}
+                          onClick={() => {
+                            let array = {
+                              option: "",
+                              isCorrect: false,
+                              richTextEditor: false,
+                            };
+                            let array1 = [...question.options];
+                            array1.push(array);
+                            setQuestion({ ...question, options: array1 });
+                          }}
+                          className="btn text-primary  btn-lg  tb-3"
+                        >
+                          + Add Option
+                        </button>
                         <div className="col-md-10">
                           {" "}
                           <button
@@ -638,37 +779,27 @@ if(errors.decision &&   !errors.flag ){
                           >
                             Submit
                           </button>
-                          <button
-                            className="btn btn-outline-secondary btn-lg "
-                            style={{ marginLeft: "20px" }}
-                            type="cancel"
+                          <Link
+                            to={{ pathname: `/` }}
+                            className="btn addButton btn-primary"
                           >
                             Cancel
-                          </button>
+                          </Link>
                           <span style={{ color: "red" }}>
-                            {(isSubmit &&  formErrors.decision )   ?    !formErrors.correct && "Please provide correct option":""}
-                            {(isSubmit  )   ?    formErrors.flag && "Duplicate options are not allowed.Please select correct answer from options":""}{" "}
+                            {isSubmit && formErrors.decision
+                              ? !formErrors.correct &&
+                                "Please provide correct option"
+                              : ""}
+                            {isSubmit
+                              ? formErrors.flag &&
+                                "Duplicate options are not allowed.Please select correct answer from options"
+                              : ""}{" "}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    let array = {
-                      option: "",
-                      isCorrect: false,
-                      richTextEditor: false,
-                    };
-                    let array1 = [...question.options];
-                    array1.push(array);
-                    setQuestion({ ...question, options: array1 });
-                  }}
-                  className="btn btn-outline-white  btn-lg "
-                >
-                  + Add Option
-                </button>
               </div>
             </div>
           </div>
@@ -677,5 +808,29 @@ if(errors.decision &&   !errors.flag ){
     </div>
   );
 }
+
+AddQuestion.modules = {
+  toolbar: [
+    [{ font: [] }],
+    [{ size: ["small", false, "large", "huge"] }],
+    ["bold", "italic", "underline"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ align: [] }],
+    [{ color: [] }, { background: [] }],
+    ["clean"],
+  ],
+};
+AddQuestion.formats = [
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "list",
+  "bullet",
+  "align",
+  "color",
+  "background",
+];
 
 export default AddQuestion;

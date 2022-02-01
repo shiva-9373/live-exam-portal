@@ -16,7 +16,7 @@ function RenderQuetion(props) {
         <div className="singleQuestion">
           <div>
             <input id="hello" type="checkbox" />&nbsp;
-            <label for="hello">{prev1.questionText}</label>
+            <label for="hello"  dangerouslySetInnerHTML={{__html:prev1.questionText}} ></label>
             {prev1.options.map((prev) => {
               const optionIndex = prev1.options.indexOf(prev);
               return (
@@ -29,7 +29,7 @@ function RenderQuetion(props) {
                     checked={prev.isCorrect === true ? true : false}
                     readOnly
                   />&nbsp;
-                  <label for={prev.option}>{prev.option}</label>
+                  <label for={prev.option}  dangerouslySetInnerHTML={{__html:prev.option}} ></label>
                 </div>
               );
             })}

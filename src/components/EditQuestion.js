@@ -1,40 +1,96 @@
 import React, { useState, useEffect } from "react";
 import http from "../services/http_common";
 import { v4 as uuid } from "uuid";
-import { useParams, useLocation,Link } from "react-router-dom";
-
-
+import { useParams, Link } from "react-router-dom";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import "react-quill/dist/quill.bubble.css";
 
 function EditQuestion() {
-    let { id } = useParams();
-    const [rawQuestion,setrawQuestion]=useState()
-    const [question, setQuestion] = useState()
-    const [loading, setLoading] = useState(true);
-    const [isValid,setIsValid]=useState(false)
-console.log(id)
-    useEffect(() => {
-        async function fetchdata() {
-          setLoading(true);
-          const request1 = await http.get(`questions/${id}`);
-          setrawQuestion(request1.data);
-          console.log("hello")
-          setLoading(false);
-        }
-        fetchdata();
-      }, []);
+  let { id } = useParams();
+  const [rawQuestion, setRawQuestion] = useState();
+  const [question, setQuestion] = useState();
+  const [loading, setLoading] = useState(true);
+  const [isValid, setIsValid] = useState(false);
 
-    useEffect(()=>{
-      const dummy= rawQuestion ? { 
-        diffLevel: rawQuestion.diffLevel,
-options: rawQuestion.options,
-questionText: rawQuestion.questionText,
-rightMarks:rawQuestion.rightMarks ,
-subject: rawQuestion.subject._id,
-topic: rawQuestion.topic._id,
-type: rawQuestion.type,
-wrongMarks: rawQuestion.wrongMarks}:""
-setQuestion(dummy)
-},[rawQuestion])
+  const [richTextInfo,setRichTextInfo]=useState()
+  const [subjectDisplay, setSubjectDisplay] = useState({
+    subject: rawQuestion  ? rawQuestion.subject ? rawQuestion.subject.name:"" : "",
+    topic: question ? rawQuestion.topic.name : "",
+    richTextEnable: false,
+    options: [],
+  });
+  useEffect(() => {
+    async function fetchdata() {
+      setLoading(true);
+      const request1 = await http.get(`questions/${id}`);
+      setRawQuestion(request1.data);
+
+      setLoading(false);
+    }
+    fetchdata();
+  }, []);
+
+  useEffect(() => {
+    if (question) {
+      if (question.questionText.includes("<")) {
+        setSubjectDisplay({
+          ...subjectDisplay,
+          richTextEnable: true,
+        });
+      }
+      const array = subjectDisplay.options;
+      for (let i = 0; i < question.options; i++) {
+        if (question.options[i].option.includes("<")) {
+          const array1 = array[i];
+          array1.richTextEditor = true;
+          array[i] = array1;
+        }
+      }
+      setSubjectDisplay({ ...subjectDisplay, options: array });
+    }
+  }, []);
+
+  useEffect(() => {
+    const dummy = rawQuestion
+      ? {
+          diffLevel: rawQuestion.diffLevel,
+          options: rawQuestion.options,
+          questionText: rawQuestion.questionText,
+          rightMarks: rawQuestion.rightMarks,
+          subject: rawQuestion.topic.subject ,
+          topic: rawQuestion.topic._id,
+          type: rawQuestion.type,
+          wrongMarks: rawQuestion.wrongMarks,
+        }
+      : "";
+    setQuestion(dummy);
+
+    if(dummy){
+      const array=dummy.options
+      for(let i=0;i<dummy.options.length;i++){
+         if(array[i].option.includes("<")){
+             array[i].richTextEditor=true
+         }
+         else{
+            array[i].richTextEditor=false
+
+         }
+
+      }
+      setRichTextInfo(array)
+
+      if(dummy.questionText.includes("<")){
+        setSubjectDisplay({
+          ...subjectDisplay,
+          richTextEditor: true,
+        })
+      }
+    }
+
+  }, [rawQuestion]);
+console.log(richTextInfo)
+console.log(question)
   const [subjectData, setSubjectData] = useState();
   const [subjectID, setSubjectId] = useState("");
   const [topicData, setTopicData] = useState();
@@ -43,12 +99,7 @@ setQuestion(dummy)
   const [isSubmit, setIsSubmit] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   /* ----------------------------- Question Object------------------------------------ */
-  const [subjectDisplay, setSubjectDisplay] = useState({
-    subject: rawQuestion ? rawQuestion.subject.name:"",
-    topic: question ? rawQuestion.topic.name:"",
-  });
-console.log(rawQuestion)
-  /* ----------------------------- To fetch Subject API ------------------------------------ */
+  /* \----------------------------- To fetch Subject API ------------------------------------ */
 
   useEffect(() => {
     async function fetchdata() {
@@ -76,62 +127,51 @@ console.log(rawQuestion)
     fetchdata();
   }, [subjectID]);
   /* ----------------------------- Handle Sub,it button Click ------------------------------------ */
-  console.log(formErrors)
 
   const handleSubmit = (e) => {
     setFormErrors(validate(question));
     setIsSubmit(true);
-    if(formErrors.decision &&   !formErrors.flag ){
-     
-    setIsValid(true)
-    }else{
-      setIsValid(false)
-
-    }
-    console.log(isValid)
-
-    if(isValid){
-      putData()
-    }else{
-      console.log("filllllll")
+    if (formErrors.decision && !formErrors.flag) {
+      setIsValid(true);
+    } else {
+      setIsValid(false);
     }
 
+    if (isValid) {
+      putData();
+    } else {
+    }
   };
 
   /* ----------------------------- Form validation ------------------------------------ */
   const validate = (values) => {
-    console.log("hello from validation  ")
     const errors = {};
-    errors.decision=true
-    const count=0
-    let array=[]
-    errors.flag=false
-   
+    errors.decision = true;
+    const count = 0;
+    let array = [];
+    errors.flag = false;
+
     if (!question.subject) {
       errors.subject = "subject is required!";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.subject = "";
     }
     if (!question.topic) {
       errors.topic = "topic is required!";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.topic = "";
     }
     if (!question.questionText) {
       errors.questionText = "question is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.questionText = "";
     }
     if (!question.diffLevel) {
       errors.diffLevel = "Difficulty level is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.diffLevel = "";
     }
@@ -144,52 +184,44 @@ console.log(rawQuestion)
     // }
     if (!question.rightMarks) {
       errors.rightMarks = "Right Marks level is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.rightMarks = "";
     }
 
-    if ( question.wrongMarks!==0 && !question.wrongMarks ) {
+    if (question.wrongMarks !== 0 && !question.wrongMarks) {
       errors.wrongMarks = "Wrong marks  is required";
-      errors.decision=false
-
+      errors.decision = false;
     } else {
       errors.wrongMarks = "";
     }
     question.options.map((prev, index) => {
       if (!prev.option) {
-        array.push( "option required");
-        errors.decision=false
-
+        array.push("option required");
+        errors.decision = false;
       } else {
-        array.push( "");
+        array.push("");
       }
-      if(prev.isCorrect){
-          errors.correct=true
-
+      if (prev.isCorrect) {
+        errors.correct = true;
       }
-      console.log(prev.option)
-      for(let a=index+1;a<question.options.length;a++){
-      if( prev.option===question.options[a].option){
-        errors.flag=true
-      }}
+      for (let a = index + 1; a < question.options.length; a++) {
+        if (prev.option === question.options[a].option) {
+          errors.flag = true;
+        }
+      }
     });
 
-errors.option=array
-if(errors.decision &&   !errors.flag ){
-     
-  setIsValid(true)
-  }else{
-    setIsValid(false)
-
-  }
-console.log(isValid)
+    errors.option = array;
+    if (errors.decision && !errors.flag) {
+      setIsValid(true);
+    } else {
+      setIsValid(false);
+    }
     return errors;
   };
-console.log(isValid)
   useEffect(() => {
-     question && setFormErrors(validate(question));
+    question && setFormErrors(validate(question));
   }, [question, isSubmit]);
 
   /* ----------------------------- Subject DataList------------------------------------ */
@@ -291,13 +323,21 @@ console.log(isValid)
   }
 
   function handleRadioClick(event) {
-    let array = { ...question.options[event.target.id] };
-    array.isCorrect = event.target.checked;
     let array1 = [...question.options];
-    array1[event.target.id] = array;
+
+    for (let a = 0; a < question.options.length; a++) {
+      if (a == event.target.id) {
+        let array = array1[a];
+        array.isCorrect = true;
+        array1[a] = array;
+      } else {
+        let array = array1[a];
+        array.isCorrect = false;
+        array1[a] = array;
+      }
+    }
     setQuestion({ ...question, options: array1 });
   }
-
   function handleCheckboxClick(event) {
     let array = { ...question.options[event.target.name] };
     array.isCorrect = event.target.checked;
@@ -314,6 +354,32 @@ console.log(isValid)
     setQuestion({ ...question, options: array1 });
   }
 
+  /* ----------------------------- question rich text editor ------------------------------------ */
+  function handleRichText() {
+    setSubjectDisplay({
+      ...subjectDisplay,
+      richTextEnable: !subjectDisplay.richTextEnable,
+    });
+  }
+  /* ----------------------------- options rich text editor ------------------------------------ */
+
+  function handleOptionRichText(event) {
+    let array = { ...question.options[event.target.id] };
+    array.richTextEditor = !array.richTextEditor;
+    let array1 = [...question.options];
+    array1[event.target.id] = array;
+    setQuestion({ ...question, options: array1 });
+  }
+ 
+
+
+  function handleQuillChange(event, index1) {
+    let array = { ...question.options[index1] };
+    array.option = event;
+    let array1 = [...question.options];
+    array1[index1] = array;
+    setQuestion({ ...question, options: array1 });
+  }
   /* ----------------------------- render option ------------------------------------ */
 
   function optionDisplay(index1) {
@@ -347,30 +413,51 @@ console.log(isValid)
           &nbsp;
           <label for="optionRender"> option{index1 + 1} </label>
         </span>
-        <textarea
-          name={index1}
-          id={`${small_id}`}
-          required="required"
-          data-error="Please, leave us a message."
-          type="text"
-          value={question.options[index1].option}
-          onChange={(event) => {
-            handleChange(event);
-          }}
-          className="form-control"
-        />
+        <div>
+          {question.options[index1].richTextEditor ? (
+            <ReactQuill
+              id={index1}
+              placeholder="insert text here"
+              theme="snow"
+              modules={EditQuestion.modules}
+              formats={EditQuestion.formats}
+              value={question.options[index1].option}
+              onChange={(event) => {
+                handleQuillChange(event, index1);
+              }}
+            />
+          ) : (
+            <textarea
+              name={index1}
+              id={`${small_id}`}
+              required="required"
+              data-error="Please, leave us a message."
+              type="text"
+              value={question.options[index1].option}
+              onChange={(event) => {
+                handleChange(event);
+              }}
+              className="form-control optionTextArea"
+            />
+          )}
+        </div>
+        <span id={index1} onClick={handleOptionRichText}>
+          {question.options[index1].richTextEditor ? "disable" : "enable"} rich
+          text editor |
+        </span>&nbsp;
         <span style={{ color: "red" }}>
-                              {isSubmit ? formErrors.option[index1] : ""}{" "}
-                            </span>
+          {isSubmit ? formErrors.option[index1] : ""}{" "}
+        </span>
+        &nbsp;
 
-        <button
+        <span
           id={index1}
           onClick={() => {
             deleteOption(index1);
           }}
         >
           delete Option
-        </button>
+        </span>
       </div>
     );
   }
@@ -400,7 +487,7 @@ console.log(isValid)
                               type="text"
                               list="select_question1"
                               id="form_name"
-                              value={ rawQuestion   && rawQuestion.subject.name}
+                              value={rawQuestion  ? rawQuestion.subject ? subjectDisplay.subject:"" : ""}
                               onChange={handleSubjectClick}
                               class="form-control"
                               placeholder="Type to search Subject"
@@ -413,6 +500,7 @@ console.log(isValid)
                             <button
                               type="reset"
                               onClick={() => {
+                                console.log("hello")
                                 setQuestion({
                                   ...question,
                                   subject: "",
@@ -440,7 +528,13 @@ console.log(isValid)
                               list="select_topic"
                               id="form_name"
                               onChange={handleTopicClick}
-                              value={rawQuestion? rawQuestion.topic ? rawQuestion.topic.name:"":""}
+                              value={
+                                rawQuestion
+                                  ? rawQuestion.topic
+                                    ? rawQuestion.topic.name
+                                    : ""
+                                  : ""
+                              }
                               // onFocus={clear}
                               className="form-control"
                               placeholder="Type to search Subject"
@@ -481,7 +575,7 @@ console.log(isValid)
                               list="question_type"
                               id="form_name"
                               onChange={handleTypeClick}
-                              value=  {question && question.type}
+                              value={question && question.type}
                               // onFocus={clear}
                               className="form-control"
                               placeholder="Type to search Subject"
@@ -520,13 +614,12 @@ console.log(isValid)
                               list="diff_type"
                               id="form_name"
                               onChange={handleDiffClick}
-                              value= { question && question.diffLevel}
+                              value={question && question.diffLevel}
                               // onFocus={clear}
                               className="form-control"
                               placeholder="Type to search Subject"
                               required="required"
-                              data-error="Firstname is required."
-                              placeholder="Search topic here "
+                             
                             />
                             <span style={{ color: "red" }}>
                               {isSubmit ? formErrors.type : ""}{" "}
@@ -555,7 +648,7 @@ console.log(isValid)
                             <input
                               id="form_name"
                               type="number"
-                              value={ question &&  question.rightMarks}
+                              value={question && question.rightMarks}
                               onChange={(event) => {
                                 setQuestion({
                                   ...question,
@@ -575,7 +668,7 @@ console.log(isValid)
                             <label for="wrongMarks">Wrong Marks</label>{" "}
                             <input
                               id="wrongMarks"
-                              value={ question && question.wrongMarks}
+                              value={question && question.wrongMarks}
                               type="number"
                               onChange={(event) => {
                                 setQuestion({
@@ -588,75 +681,78 @@ console.log(isValid)
                               placeholder="Please enter Right Marks "
                               required="required"
                               data-error="Lastname is required."
-                            /><span style={{ color: "red" }}>
-                            {isSubmit ? formErrors.wrongMarks : ""}{" "}
-                          </span>{" "}
+                            />
+                            <span style={{ color: "red" }}>
+                              {isSubmit ? formErrors.wrongMarks : ""}{" "}
+                            </span>{" "}
                           </div>
                         </div>
                       </div>
                     </div>
                     <div className="row " style={{ textAlign: "left" }}>
                       <div className="col-md-12">
-                        <div className="form-group">
+                        <div className="form-group  "  >
                           {" "}
                           <label for="form_message ">Question</label>{" "}
-                          <textarea
-                            id="form_message"
-                            name="message"
-                            value={ question && question.questionText
-                            }
-                            onChange={(event) => {
-                              setQuestion({
-                                ...question,
-                                questionText: event.target.value,
-                              });
-                            }}
-                            className="form-control"
-                            placeholder="Write your Question here."
-                            rows="2"
-                            required="required"
-                            data-error="Please, leave us a message."
-                          ></textarea>{" "}
+                          <div className="questionDiv">
+                          {subjectDisplay.richTextEnable ? (
+                            <ReactQuill
+                              placeholder="insert text here"
+                              theme="snow"
+                              modules={EditQuestion.modules}
+                              formats={EditQuestion.formats}
+                              value={question.questionText}
+                              onChange={(event) => {
+                                setQuestion({
+                                  ...question,
+                                  questionText: event,
+                                });
+                              }}
+                            />
+                          ) : (
+                            <textarea
+                              id="form_message"
+                              value={question && question.questionText}
+                              name="message"
+                              onChange={(event) => {
+                                setQuestion({
+                                  ...question,
+                                  questionText: event.target.value,
+                                });
+                              }}
+                              className="form-control queTextArea"
+                              placeholder="Write your Question here."
+                              rows="2"
+                              required="required"
+                              data-error="Please, leave us a message."
+                            ></textarea>
+                          )}
+                          <span onClick={handleRichText}>
+                            {" "}
+                            {subjectDisplay.richTextEnable
+                              ? "disable"
+                              : "enable"}{" "}
+                            rich text editor 
+                          </span>
                           <span style={{ color: "red" }}>
                             {isSubmit ? formErrors.questionText : ""}{" "}
                           </span>
-                          <br/>
+                          </div>
+
+                          <br />
                           <label for="basic-addon1 ">Options</label>{" "}
                           <div>
-                            { question? question.options.map((prev) => {
-                              const index = question.options.indexOf(prev);
-                              return optionDisplay(index);
-                            }):""}
+                            {question
+                              ? question.options.map((prev) => {
+                                  const index = question.options.indexOf(prev);
+                                  return optionDisplay(index);
+                                })
+                              : ""}
                           </div>
                         </div>
                       </div>
-                      <div className="row " style={{ textAlign: "left" }}>
-                        <div className="col-md-10">
-                          {" "}
-                          <button
-                            className="btn btn-outline-success btn-lg "
-                            type="submit"
-                            onClick={handleSubmit}
-                          >
-                           <Link  to={{pathname:`/`, state:"hello" }}  > Submit</Link>
-                          </button>
-                          <button
-                            className="btn btn-outline-secondary btn-lg "
-                            style={{ marginLeft: "20px" }}
-                            type="cancel"
-                          >
-                            Cancel
-                          </button>
-                          <span style={{ color: "red" }}>
-                            {(isSubmit &&  formErrors.decision )   ?    !formErrors.correct && "Please provide correct option":""}
-                            {(isSubmit  )   ?    formErrors.flag && "Duplicate options are not allowed.Please select correct answer from options":""}{" "}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button
+                      <button
+                      style={{ textAlign: "left" }}
                   onClick={() => {
                     let array = {
                       option: "",
@@ -667,10 +763,44 @@ console.log(isValid)
                     array1.push(array);
                     setQuestion({ ...question, options: array1 });
                   }}
-                  className="btn btn-outline-white  btn-lg "
+                  className="btn btn-outline-white  text-primary btn-lg tb-3"
                 >
                   + Add Option
                 </button>
+                      <div className="row " style={{ textAlign: "left" }}>
+                        <div className="col-md-10">
+                          {" "}
+                          <button
+                            className="btn btn-outline-success btn-lg text-white "
+                            type="submit"
+                            onClick={handleSubmit}
+                          >
+                            <Link className="text-success"
+                              to={isValid && { pathname: `/`, state: "hello" }}
+                            >
+                              {" "}
+                              Submit
+                            </Link>
+                          </button>
+                          <Link to={{pathname:`/` }}className="btn addButton btn-primary">
+            Cancel
+          </Link>
+                          <span style={{ color: "red" }}>
+                            {isSubmit && formErrors.decision
+                              ? !formErrors.correct &&
+                                "Please provide correct option"
+                              : ""}
+                            {isSubmit
+                              ? formErrors.flag &&
+                                "Duplicate options are not allowed.Please select correct answer from options"
+                              : ""}{" "}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+               
               </div>
             </div>
           </div>
@@ -679,5 +809,29 @@ console.log(isValid)
     </div>
   );
 }
+
+EditQuestion.modules = {
+  toolbar: [
+    [{ font: [] }],
+    [{ size: ["small", false, "large", "huge"] }],
+    ["bold", "italic", "underline"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ align: [] }],
+    [{ color: [] }, { background: [] }],
+    ["clean"],
+  ],
+};
+EditQuestion.formats = [
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "list",
+  "bullet",
+  "align",
+  "color",
+  "background",
+];
 
 export default EditQuestion;

@@ -5,11 +5,7 @@ import { Link,useParams } from "react-router-dom";
 import http from "../services/http_common";
 
 function DisplayQuetions(props) {
-  
-  // let { id } = useParams();
-  // if(id ? id:"")
-  
-  // console.log(id)
+
 
   const [data, setData] = useState();
   const [topic, setTopic] = useState();
@@ -21,6 +17,8 @@ function DisplayQuetions(props) {
   const [inputValue, setInputValue] = useState("");
   const [term, setTerm] = useState("");
   const [deleteQueId, setDeleteQueId] = useState("");
+  const [pageStarting,setPageStarting]=useState(1)
+
 
  
 
@@ -29,7 +27,7 @@ function DisplayQuetions(props) {
       setLoading(true);
 
       const request2 = await http.get(
-        `http://admin.liveexamcenter.in/api/topics?page=1&limit=9007199254740991&term=`
+        `topics?page=1&limit=9007199254740991&term=`
       );
 
       setTopic(request2.data);
@@ -51,14 +49,14 @@ function DisplayQuetions(props) {
     async function fetchdata() {
       setLoading(true);
       const request1 = await http.get(
-        `questions?page=${offset}&limit=${countPerPage}&term=${term}&topic=${topicId }`
+        `questions?page=${pageStarting}&limit=${countPerPage}&term=${term}&topic=${topicId }`
       );
       setData(request1.data);
       setLengthQuestion(request1.data.totalCount);
       setLoading(false);
     }
     fetchdata();
-  }, [countPerPage, topicId, term, deleteQueId]);
+  }, [countPerPage, topicId, term, deleteQueId,pageStarting]);
 
   // useEffect(()=>{
   //   async function fetchdata(){
@@ -75,7 +73,7 @@ function DisplayQuetions(props) {
   const sliceData = data ? data : [];
   useEffect(() => {
     setPageCount(Math.ceil(lengthQuetion / countPerPage));
-  }, [lengthQuetion]);
+  }, [lengthQuetion,countPerPage]);
 
   function dropDownDynamic() {
     return topic
@@ -99,6 +97,7 @@ function DisplayQuetions(props) {
 
   let selectedPage;
   const handlePageClick = (e) => {
+    setPageStarting(e.selected + 1)
     selectedPage = e.selected;
     setOffset(selectedPage * countPerPage);
   };
@@ -114,6 +113,8 @@ function DisplayQuetions(props) {
       if (event.target.value == topic.result[i].name) {
         setTopicId(topic.result[i]._id);
         setInputValue(topic.result[i].name);
+        setPageStarting(1)
+
       }
     }
 
@@ -137,11 +138,13 @@ function DisplayQuetions(props) {
   if (loading) {
     return <h1>Data is loading...</h1>;
   }
+
+  console.log(pageCount)
   return (
     <>
       <div>
         <div className=" firstContainer d-flex">
-          <h2 className="que">Quetions</h2>
+          <h2 className="que">Questions</h2>
           <Link to={{pathname:`/addquestion`,state:"hello" }}className="btn addButton btn-primary">
             + Add Quetion
           </Link>
@@ -151,7 +154,7 @@ function DisplayQuetions(props) {
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
               <div className="d-flex">
-                <p>Show</p>
+                <p>Show  &nbsp;</p>
 
                 <div className="dropdown">
                   <button
@@ -206,7 +209,7 @@ function DisplayQuetions(props) {
                     </button>
                   </div>
                 </div>
-                <p>record per page</p>
+                <p> &nbsp;record per page</p>
               </div>
               <div classNameName="d-flex">
                 <form className="d-flex">
@@ -267,9 +270,11 @@ function DisplayQuetions(props) {
               pageCount={pageCount}
               pageRangeDisplayed={4}
               marginPagesDisplayed={1}
+              forcePage={pageStarting - 1}
               // onPageChange={setPage}
-              container
-              className="pagination"
+              containerClassName={"pagination"}
+              // disabledClassName={"pagination__link--disabled"}
+              // activeClassName={"pagination__link--active"}
               activeClassName="active"
               pageLinkClassName="page-link"
               breakLinkClassName="page-link"
