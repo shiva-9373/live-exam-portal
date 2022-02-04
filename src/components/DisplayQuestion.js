@@ -3,6 +3,8 @@ import RenderQuetion from "./RenderQuetion";
 import ReactPaginate from "react-paginate";
 import { Link,useParams } from "react-router-dom";
 import http from "../services/http_common";
+import Navbar from "./Navbar";
+
 
 function DisplayQuetions(props) {
 
@@ -143,6 +145,7 @@ function DisplayQuetions(props) {
   return (
     <>
       <div>
+        <Navbar/>
         <div className=" firstContainer d-flex">
           <h2 className="que">Questions</h2>
           <Link to={{pathname:`/addquestion`,state:"hello" }}className="btn addButton btn-primary">

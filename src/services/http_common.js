@@ -1,5 +1,8 @@
 import axios from "axios";
-const token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWRlNTgyY2U2ZDdkNzdjOGU0ZmEzMWEiLCJfYWN0aXZlT3JnIjoiNjE5Y2U0YThlNTg2ODUxNDYxMGM4ZGE3IiwiaWF0IjoxNjQzNjAyMzUzLCJleHAiOjE2NDM2NDU1NTN9.M4OOBAktKJetUCop1quTNQ9v8JYSlJ9yIo5kXQeRovU";
+let token
+if(sessionStorage.getItem("key")){
+   token = JSON.parse(sessionStorage.getItem("key"));
+}
 
 export default axios.create({
   baseURL: "http://admin.liveexamcenter.in/api/",

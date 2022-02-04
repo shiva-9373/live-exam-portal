@@ -4,6 +4,13 @@ import { v4 as uuid } from "uuid";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "react-quill/dist/quill.bubble.css";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import Navbar from "./Navbar";
+
+
+
+
 import { Link } from "react-router-dom";
 
 function AddQuestion() {
@@ -88,7 +95,7 @@ function AddQuestion() {
   const handleSubmit = (e) => {
     setFormErrors(validate(question));
     setIsSubmit(true);
-    if (formErrors.decision && !formErrors.flag) {
+    if (formErrors.decision && !formErrors.flag && !formErrors.flag1) {
       setIsValid(true);
     } else {
       setIsValid(false);
@@ -96,7 +103,17 @@ function AddQuestion() {
     if (isValid) {
       sendData();
       setIsSubmit(false);
-
+      toast.success("Question Added SuccessFully", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+    }); 
+    
+    
       setQuestion({
         diffLevel: "Hard",
         options: [
@@ -136,12 +153,15 @@ function AddQuestion() {
     }
   };
 
+  console.log(formErrors)
+
   /* ----------------------------- Form validation ------------------------------------ */
   const validate = (values) => {
     const errors = {};
     errors.decision = true;
     errors.flag = false;
-    const count = 0;
+    errors.flag1 = false;
+
     let array = [];
 
     if (!values.subject) {
@@ -197,11 +217,19 @@ function AddQuestion() {
       }
       if (prev.isCorrect) {
         errors.correct = true;
+        // formErrors.decision=false
+      }
+
+      if(prev.isCorrect){
+        errors.flag=true
+      }else{
+        errors.flag=false
+
       }
 
       for (let a = index + 1; a < question.options.length; a++) {
         if (prev.option === question.options[a].option) {
-          errors.flag = true;
+          errors.flag1 = true;
         }
       }
     });
@@ -214,6 +242,7 @@ function AddQuestion() {
     }
     return errors;
   };
+  console.log(formErrors)
 
   useEffect(() => {
     setFormErrors(validate(question));
@@ -482,7 +511,10 @@ function AddQuestion() {
   /* ----------------------------- Html ------------------------------------ */
 
   return (
+    <div>
+              <Navbar/>
     <div className="container text-left">
+
       {" "}
       <div className=" text-left mt-5 ">
         <h1>Add Question</h1>
@@ -787,11 +819,11 @@ function AddQuestion() {
                           </Link>
                           <span style={{ color: "red" }}>
                             {isSubmit && formErrors.decision
-                              ? !formErrors.correct &&
+                              ? !formErrors.flag &&
                                 "Please provide correct option"
                               : ""}
                             {isSubmit
-                              ? formErrors.flag &&
+                              ? formErrors.flag1 &&
                                 "Duplicate options are not allowed.Please select correct answer from options"
                               : ""}{" "}
                           </span>
@@ -805,6 +837,9 @@ function AddQuestion() {
           </div>
         </div>
       </div>
+
+    </div>
+    <ToastContainer/>
     </div>
   );
 }

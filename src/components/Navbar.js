@@ -2,10 +2,9 @@ import React from "react";
 
 function Navbar() {
   return (
-    <div >
+    <div>
       <nav className=" navbarCss navbar navbar-expand-lg navbar-dark bg-dark ">
         <div class="container-fluid">
-         
           <button
             class="navbar-toggler"
             type="button"
@@ -20,7 +19,7 @@ function Navbar() {
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
               <a class="nav-link active" aria-current="page" href="#">
-                Quetions
+                Questions
               </a>
               <a class="nav-link" href="#">
                 Subjects
@@ -28,7 +27,19 @@ function Navbar() {
               <a class="nav-link" href="#">
                 Topics
               </a>
-              
+              <div className="flot-right">
+                <button
+                  className=" float-right btn bg-white text-primary "
+                  style={{ marginLeft: "1100px" }}
+                  onClick={() => {
+                    sessionStorage.clear("key");
+                    window.open("/", "_self");
+                  }}
+                >
+                  {" "}
+                  logout
+                </button>
+              </div>
             </div>
           </div>
         </div>

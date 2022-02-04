@@ -4,7 +4,9 @@ import { v4 as uuid } from "uuid";
 import { useParams, Link } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import "react-quill/dist/quill.bubble.css";
+import "react-quill/dist/quill.bubble.css"
+import Navbar from "./Navbar";
+
 
 function EditQuestion() {
   let { id } = useParams();
@@ -465,6 +467,8 @@ console.log(question)
   /* ----------------------------- Html ------------------------------------ */
 
   return (
+    <div>
+      <Navbar/>
     <div className="container text-left">
       {" "}
       <div className=" text-left mt-5 ">
@@ -806,6 +810,7 @@ console.log(question)
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -1,10 +1,27 @@
-import React, { useState,  } from "react";
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import React, { useState } from "react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { injectStyle } from "react-toastify/dist/inject-style";
+import { ToastContainer, toast } from "react-toastify";
+import { useNavigate,  } from "react-router-dom";
+
+
+
 import axios from "axios";
 
 function Login() {
+  sessionStorage.clear("key")
+
+
+  const navigate = useNavigate()
+
+
+
   const { executeRecaptcha } = useGoogleReCaptcha();
-    // const url = "http://admin.liveexamcenter.in/api/auth/login";
+  // const url = "http://admin.liveexamcenter.in/api/auth/login";
+
+  if (typeof window !== "undefined") {
+    injectStyle();
+  }
 
   const [credentials, setCredentials] = useState({
     email: "",
@@ -12,49 +29,58 @@ function Login() {
     reCaptchaToken: "",
   });
 
- async function onSubmitHandle(e) {
+  async function onSubmitHandle(e) {
     e.preventDefault();
-    console.log("hello")
+    console.log("hello");
 
     let response;
     try {
-        if (!executeRecaptcha) {
-            console.log('execute recaptcha is not available');
-            return;
+      if (!executeRecaptcha) {
+        console.log("execute recaptcha is not available");
+        return;
+      }
+
+      let captchaResponse = await executeRecaptcha("Action_Name"); //it is token
+      console.log(captchaResponse);
+      console.log(response)
+
+      response = await axios.post(
+        " https://admin.liveexamcenter.in/api/auth/login",
+        {
+          email: credentials.email,
+          password: credentials.password,
+          reCaptchaToken: captchaResponse,
         }
-        
-            let captchaResponse = await executeRecaptcha('Action_Name');//it is token
-            console.log(captchaResponse);
-          
-        
-        response = await axios.post(" https://admin.liveexamcenter.in/api/auth/login", { email:credentials.email, password:credentials.password, reCaptchaToken: captchaResponse })
-
-        console.log(response);
+      );
 
 
+     
+    } catch (e) {
+      console.log(e.response)
 
+      // setEmail('');
+      // setPassword('');
+      toast.error(e.response.data.message, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+      });
+    }
+    console.log(response)
 
-} catch (e) {
-// setEmail('');
-// setPassword('');
-// toast.error(`Enter Valid Email ID And Password!`, {
-//     position: "top-right",
-//     autoClose: 5000,
-//     hideProgressBar: false,
-//     closeOnClick: true,
-//     pauseOnHover: true,
-//     draggable: true,
-//     progress: undefined,
-// });
-}
+    if (response && response.status==200) {
+      sessionStorage.setItem("key",JSON.stringify(response.data.token))
+    window.open("/displayquestion",'_self')
+    }
   }
-
-  
 
   console.log(credentials);
   return (
     <div>
-      
       <div class="container">
         <div class="row">
           <div class="col-lg-10 col-xl-9 mx-auto">
@@ -66,7 +92,6 @@ function Login() {
                   Login to your account
                 </h4>
                 <form onSubmit={(e) => onSubmitHandle(e)}>
-                 
                   <div class="form-floating mb-3">
                     <input
                       value={credentials.email}
@@ -124,8 +149,6 @@ function Login() {
                     <button
                       class="btn btn-lg btn-google btn-login fw-bold text-uppercase"
                       type="submit"
-
-
                     >
                       <i class="fab fa-google me-2"></i> Log in with google
                     </button>
@@ -139,6 +162,8 @@ function Login() {
           Don't have account, signup now{" "}
         </p>
       </div>
+      <ToastContainer />
+
     </div>
   );
 }
