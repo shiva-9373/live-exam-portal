@@ -1,4 +1,6 @@
 import React from "react";
+import Cookies from 'js-cookie'
+
 
 function Navbar() {
   return (
@@ -32,8 +34,8 @@ function Navbar() {
                   className=" float-right btn bg-white text-primary "
                   style={{ marginLeft: "1100px" }}
                   onClick={() => {
-                    sessionStorage.clear("key");
-                    window.open("/", "_self");
+                    Cookies.remove();
+                     window.open("/", "_self");
                   }}
                 >
                   {" "}

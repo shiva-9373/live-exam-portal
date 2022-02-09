@@ -4,7 +4,7 @@ import EditQuestion from "./components/EditQuestion";
 import QuillEditor from "./components/QuillEditor";
 import Footer from "./components/Footer";
 import DisplayQuestion from "./components/DisplayQuestion";
-import Login from "./components/Login";
+import Login from "./components/Login/Login";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
